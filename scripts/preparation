@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+
+# openEuler arch, can be x86_64 or aarch64
+export OPENEULER_ARCH="${OPENEULER_ARCH:=x86_64}"
+# suseEuler arch, reserved
+export SUSEEULER_ARCH=""
+# openEuler version, e.g. 22.03-LTS
+export OPENEULER_VERSION="${OPENEULER_VERSION:=22.03-LTS}"
+# suseEuler version, reserved
+export SUSEEULER_VERSION=""
+# AWS s3 bucket name
+export AWS_BUCKET_NAME="${AWS_BUCKET_NAME}"
+# AWS region, e.g. ap-northeast-1
+export AWS_REGION="${AWS_REGION:=ap-northeast-1}"
+
+# TODO: Add aliyun
+
+if [[ -z "${AWS_BUCKET_NAME}" ]]; then
+    echo "AWS_BUCKET_NAME environment required!"
+    exit 1
+fi
+
+# Ensure current dir is `scripts`
+cd $(dirname $0)
+
+# Shrink qcow2 image size to 8GB and convert it to RAW image
+VERSION="${OPENEULER_VERSION}" ARCH="${OPENEULER_ARCH}" ./openeuler-shrink-qcow2
+# Upload RAW image to AWS s3 bucket and create snapshot from it
+VERSION="${OPENEULER_VERSION}" ARCH="${OPENEULER_ARCH}" REGION="${AWS_REGION}" BUCKET_NAME="${AWS_BUCKET_NAME}" ./openeuler-create-aws-snapshot

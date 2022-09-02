@@ -1,0 +1,43 @@
+#!/bin/bash
+set -e -x
+
+cd $(dirname $0)/../openeuler/aws
+
+if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+    echo AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be set
+fi
+
+if [ -z "${OPENEULER_VERSION}" ]; then
+    OPENEULER_VERSION="22.03-LTS"
+    echo "OPENEULER_VERSION not found, set to default: 22.03-LTS"
+else
+    echo "OPENEULER_VERSION: ${OPENEULER_VERSION}"
+fi
+
+if [ -z "${AWS_BASE_AMI}" ]; then
+    if [ -e "../../tmp/register-image.txt" ]; then
+        echo "AWS_BASE_AMI environment not found, read from tmp folder"
+        AWS_BASE_AMI=$(cat ../../tmp/register-image.txt | jq -r ".ImageId")
+        if [ -z "$AWS_BASE_AMI" ]; then
+            echo "Read failed"
+            exit 1
+        fi
+        echo "Found AWS_BASE_AMI: $AWS_BASE_AMI"
+    else
+        echo "AWS_BASE_AMI environment must be specified!"
+        exit 1
+    fi
+else
+    echo "AWS_BASE_AMI: ${AWS_BASE_AMI}"
+fi
+
+if [ -z "${OPENEULER_ARCH}" ]; then
+    echo "OPENEULER_ARCH not specified, set to x86_64"
+    OPENEULER_ARCH="x86_64"
+else
+    echo "OPENEULER_ARCH: ${OPENEULER_ARCH}"
+fi
+
+export OPENEULER_ARCH=${OPENEULER_ARCH}
+export AWS_BASE_AMI=${AWS_BASE_AMI}
+packer build ${FILE:-openeuler-aws-amis.json}

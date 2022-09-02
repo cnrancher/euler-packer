@@ -1,0 +1,177 @@
+#!/bin/bash
+set -e
+
+# Ensure awscli and jq are installed
+type aws
+type jq
+
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+    echo "Usage: "
+    echo "      BUCKET_NAME=<bucket name> REGION=<bucket region> VERSION=<version> ARCH=<arch> $0"
+    echo "Example: "
+    echo "      BUCKET_NAME=example-bucket REGION=ap-northeast-1 VERSION=22.03-LTS ARCH=x86_64 $0"
+    exit 0
+fi
+
+if [[ -z "${AWS_ACCESS_KEY_ID}" || -z "${AWS_SECRET_ACCESS_KEY}" ]]; then
+    echo "AWS cli not configured!"
+    echo "Please set 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' environment variable."
+    exit 1
+fi
+
+if [[ -z "${BUCKET_NAME}" ]]; then
+    echo "environment BUCKET_NAME needed!"
+    exit 1
+else
+    echo "BUCKET_NAME: $BUCKET_NAME"
+fi
+
+if [[ -z "${REGION}" ]]; then
+    echo "environment REGION needed!"
+    exit 1
+else
+    echo "REGION: $REGION"
+fi
+
+if [[ -z "${VERSION}" ]]; then
+    echo "Failed to shrink disk size: environment VERSION required!"
+    exit 1
+else
+    echo "VERSION: ${VERSION}"
+fi
+
+if [[ -z "${ARCH}" ]]; then
+    echo "environment ARCH not specified, set to default: x86_64"
+    ARCH=x86_64
+else
+    echo "ARCH: ${ARCH}"
+fi
+
+OPENEULER_IMG="openEuler-${VERSION}-${ARCH}"
+
+cd $(dirname $0)/../tmp
+echo "---- Current dir: $(pwd)"
+
+echo "---- Uploading RAW image to S3 Bucket..."
+exists=$(aws s3 ls ${BUCKET_NAME}/${OPENEULER_IMG}.raw || echo -n "false")
+if [[ "${exists}" == "false" ]]; then
+   echo "--- aws s3 cp"
+   aws s3 cp ${OPENEULER_IMG}.raw s3://${BUCKET_NAME}/
+else
+   echo "---- File ${OPENEULER_IMG}.raw already exist, skip uploading."
+fi
+
+echo "---- Creating vmimport policy..."
+cat << EOF > trust-policy.json
+{
+   "Version": "2012-10-17",
+   "Statement": [
+      {
+         "Effect": "Allow",
+         "Principal": { "Service": "vmie.amazonaws.com" },
+         "Action": "sts:AssumeRole",
+         "Condition": {
+            "StringEquals":{
+               "sts:Externalid": "vmimport"
+            }
+         }
+      }
+   ]
+}
+EOF
+
+aws iam create-role --role-name vmimport --assume-role-policy-document file://trust-policy.json || echo "vmimport policy already created, skip."
+
+echo "---- Creating role policy..."
+cat << EOF > role-policy.json
+{
+   "Version":"2012-10-17",
+   "Statement":[
+      {
+         "Effect": "Allow",
+         "Action": [
+            "s3:GetBucketLocation",
+            "s3:GetObject",
+            "s3:ListBucket"
+         ],
+         "Resource": [
+            "arn:aws:s3:::${BUCKET_NAME}",
+            "arn:aws:s3:::${BUCKET_NAME}/*"
+         ]
+      },
+      {
+         "Effect": "Allow",
+         "Action": [
+            "s3:GetBucketLocation",
+            "s3:GetObject",
+            "s3:ListBucket",
+            "s3:PutObject",
+            "s3:GetBucketAcl"
+         ],
+         "Resource": [
+            "arn:aws:s3:::${BUCKET_NAME}",
+            "arn:aws:s3:::${BUCKET_NAME}/*"
+         ]
+      },
+      {
+         "Effect": "Allow",
+         "Action": [
+            "ec2:ModifySnapshotAttribute",
+            "ec2:CopySnapshot",
+            "ec2:RegisterImage",
+            "ec2:Describe*"
+         ],
+         "Resource": "*"
+      }
+   ]
+}
+EOF
+echo "---- Created."
+
+aws iam put-role-policy --role-name vmimport --policy-name vmimport --policy-document file://role-policy.json
+
+echo "---- Importing image..."
+cat << EOF > container.json
+{
+	"Description": "openEuler ${VERSION} ${ARCH} from qcow2 image, disk size 8G",
+	"Format": "raw",
+	"Url": "https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com/${OPENEULER_IMG}.raw"
+}
+EOF
+aws ec2 import-snapshot \
+   --description "openEuler import task" \
+   --disk-container file://container.json > import-output.txt
+cat import-output.txt
+echo "---- Import task created."
+
+IMPORT_TAST_ID=$(cat import-output.txt | jq -r ".ImportTaskId")
+IMPORT_STATUS_MESSAGE=$(cat import-output.txt | jq -r ".SnapshotTaskDetail.Status")
+echo "----- IMPORT_TAST_ID: ${IMPORT_TAST_ID}"
+echo "---- Waiting snapshot create completed..."
+while [[ "${IMPORT_STATUS_MESSAGE}" != "completed" ]]
+do
+   sleep 2
+   aws ec2 describe-import-snapshot-tasks \
+      --import-task-ids ${IMPORT_TAST_ID} > import-output.txt
+   IMPORT_STATUS_MESSAGE=$(cat import-output.txt | jq -r ".ImportSnapshotTasks[0].SnapshotTaskDetail.Status")
+   echo "STATUS: $IMPORT_STATUS_MESSAGE"
+done
+SNAPSHOT_ID=$(cat import-output.txt | jq -r ".ImportSnapshotTasks[0].SnapshotTaskDetail.SnapshotId")
+if [[ -z "SNAPSHOT_ID" ]]; then
+   echo "---- Failed to get snapshot id"
+else
+   echo "---- shapshot id: $SNAPSHOT_ID"
+fi
+
+echo "----- Creating AMI image..."
+aws ec2 register-image \
+    --name "DEV-${OPENEULER_IMG}-BASE" \
+    --description "DEV openEuler image, do not use for production!" \
+    --root-device-name /dev/xvda \
+    --architecture x86_64 \
+    --ena-support \
+    --virtualization-type hvm \
+    --block-device-mappings \
+      DeviceName=/dev/xvda,Ebs={SnapshotId=${SNAPSHOT_ID}} > register-image.txt
+cat register-image.txt
+echo "---- $0 Done."

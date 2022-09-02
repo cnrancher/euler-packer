@@ -1,0 +1,4 @@
+/.dapper
+Dockerfile.dapper*
+!Dockerfile.dapper
+/tmp
