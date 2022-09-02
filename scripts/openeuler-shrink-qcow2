@@ -1,0 +1,121 @@
+#!/bin/bash
+set -e
+
+if [[ "$(command uname -s)" == "Darwin" ]]; then
+    echo "Shrink qcow2 does not support MacOS!"
+    exit 1
+fi
+
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+    echo "Usage: "
+    echo "      VERSION=<openEuler_version> ARCH=<arch> $0"
+    echo "Example: "
+    echo "      VERSION=<22.03-LTS> ARCH=<x86_64> $0"
+    exit 0
+fi
+
+# Ensure qemu-utils installed
+type qemu-img
+type qemu-nbd
+echo "---- qemu-utils installed"
+# Ensure partprobe exists
+type partprobe
+
+if [[ -z "${VERSION}" ]]; then
+    echo "---- Failed to shrink disk size: environment VERSION required!"
+    exit 1
+else
+    echo "---- VERSION: ${VERSION}"
+fi
+
+if [[ -z "${ARCH}" ]]; then
+    echo "---- environment ARCH not specified, set to default: x86_64"
+    ARCH=x86_64
+else
+    echo "---- ARCH: ${ARCH}"
+fi
+
+OPENEULER_IMG="openEuler-${VERSION}-${ARCH}"
+OPENEULER_DOWNLOAD_LINK="https://repo.openeuler.org/openEuler-${VERSION}/virtual_machine_img/${ARCH}/${OPENEULER_IMG}.qcow2.xz"
+
+# Download qcow2 image to tmp folder
+mkdir -p $(dirname $0)/../tmp && cd $(dirname $0)/../tmp
+if [[ -e "${OPENEULER_IMG}.raw" ]]; then
+    echo "---- ${OPENEULER_IMG} already exists, delete and re-create it?"
+    read -p "---- [y/N]: " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 0
+    rm ${OPENEULER_IMG}.raw
+fi
+
+if [[ -e "${OPENEULER_IMG}.qcow2.backup" ]]; then
+    echo "---- ${OPENEULER_IMG}.qcow2.backup already exists, skip uncompress..."
+else
+    if [[ -e "${OPENEULER_IMG}.qcow2.xz" ]]; then
+        echo "---- ${OPENEULER_IMG}.qcow2.xz already exists, skip downloading..."
+    else
+        echo "---- Downloading image..."
+        wget "${OPENEULER_DOWNLOAD_LINK}"
+    fi
+    echo "---- Uncompressing image ..."
+    unxz "${OPENEULER_IMG}.qcow2.xz"
+    cp ${OPENEULER_IMG}.qcow2 ${OPENEULER_IMG}.qcow2.backup
+fi
+
+if [[ ! -f "${OPENEULER_IMG}.qcow2" ]]; then
+    cp ${OPENEULER_IMG}.qcow2.backup ${OPENEULER_IMG}.qcow2
+fi
+
+DEV_NUM="/dev/nbd0"
+echo "---- modprobe nbd max_part=3..."
+sudo modprobe nbd max_part=3
+echo "---- qemu-nbd..."
+nbd_loaded=$(lsblk | grep nbd0 || echo -n "")
+if [[ ! -z "${nbd_loaded}" ]]; then
+    sudo qemu-nbd -d "${DEV_NUM}"
+fi
+sudo qemu-nbd -c "${DEV_NUM}" "${OPENEULER_IMG}.qcow2"
+echo "---- Disk layout..."
+echo "fdisk:"
+sudo fdisk -l "${DEV_NUM}"
+echo "lsblk:"
+lsblk -f
+# echo "---- Running e2fsck..."
+# e2fsck -fy /dev/nbd0p2
+echo "---- Resizing ext4 file system size..."
+sudo resize2fs ${DEV_NUM}p2 6G
+sudo sync
+# Add some timeout to avoid device busy error
+sleep 3
+# Reload partition table to avoid device or resource busy
+echo "---- Reloading partition table..."
+sudo partprobe /dev/nbd0
+echo "---- Resizing partition size..."
+# Refer: https://superuser.com/questions/332252/how-to-create-and-format-a-partition-using-a-bash-script
+sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | sudo fdisk ${DEV_NUM}
+  p # print current partition
+  d # delete partition
+  2 # partition number 2
+  n # create new partition
+  p # partition type primary
+  2 # partition number 2
+    # default start position
+  +6G # 6G for root partition
+  w # sync changes to disk
+  p # print partition
+  q # done
+EOF
+
+sudo sync
+sudo qemu-nbd -d /dev/nbd0
+
+echo "---- Shrinking qcow2 image size..."
+qemu-img resize ${OPENEULER_IMG}.qcow2 --shrink 8G
+qemu-img info ${OPENEULER_IMG}.qcow2
+
+echo "---- Converting ${OPENEULER_IMG}.qcow2 to RAW image..."
+qemu-img convert ${OPENEULER_IMG}.qcow2 ${OPENEULER_IMG}.raw
+
+echo "---- Clean up:"
+rm ${OPENEULER_IMG}.qcow2
+ls -alh
+
+echo "---- $0 Done."

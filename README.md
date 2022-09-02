@@ -1,1 +1,66 @@
-# euler-packer
+# Packer Build Scripts for openEuler
+
+## Purpose
+
+These scripts are used to create openEuler cloud image for AWS.
+
+## Usage
+
+1. Install build dependencies and prepare.
+
+    - Ensure `make`, `docker`, `awscli`, `jq`, `qemu-utils`, `partprobe` and `fdisk` are installed.
+    - Make sure AWS config file `~/.aws/config` is configured or `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables are configured.
+
+2. Preparation
+   - Download openEuler qcow2 image and shrink its partition size to 8G, then convert qcow2 image to RAW format.
+   - Upload openEuler RAW image to AWS S3 bucket, then create snapshot from this bucket and create base AMI image from this snapshot.
+
+    ``` sh
+    AWS_BUCKET_NAME=<bucket_name> \
+        OPENEULER_ARCH=<arch_name> \
+        OPENEULER_VERSION=<version> \
+        AWS_REGION=<region> \
+        make prep
+    ```
+
+    - Environment variables:
+       - `AWS_BUCKET_NAME`: AWS S3 bucket name, required
+       - `OPENEULER_ARCH`: openEuler arch, default is x86_64
+       - `OPENEULER_VERSION`: openEuler version, default is `22.03-LTS`
+       - `AWS_REGION`: AWS region, default is `ap-northeast-1` (Tokyo)
+
+3. Use packer to create AMI image from base AMI image.
+
+    ``` sh
+    OPENEULER_VERSION=<version> \
+        AWS_BASE_AMI=<base_ami_id> \
+        OPENEULER_ARCH=<arch> \
+        make build
+    ```
+
+    - Environment variables:
+      - `OPENEULER_VERSION`: openEuler version, default is 22.03-LTS
+      - `AWS_BASE_AMI`: base AMI id, required if not executed `make prep`
+      - `OPENEULER_ARCH`: openEuler arch, default is x86_64
+
+4. Finally packer will create a AMI image with its name format `openEuler-<VERSION>-hvm-<NUMBER>`.
+
+### Environment variables
+
+- `OPENEULER_VERSION`: (required) Version of openEuler, default is `22.03-LTS`.
+- `OPENEULER_ARCH`: Architecture of openEuler image, can be `x86_64` or `aarch64`.
+- `AWS_BUCKET_NAME`: (required) The name of AWS S3 bucket.
+- `AWS_REGION`: The region of AWS, default is `ap-northeast-1`.
+- `AWS_BASE_AMI`: (required) Base AMI id used for packer.
+
+    > If you run `make build` after `make prep`, the AWS snapshot and base AMI image is created successfully, the script will read `AWS_BASE_AMI` from log files in `tmp` folder.
+
+## Others
+
+- If `make prep` failed when trying to download/uncompress `qcow.xz` archive file, run `make clean` before re-run `make prep`.
+
+- If `make prep` failed when resizing partition size, and `/dev/nbd0` is loaded on your system, run following command before re-run `make-prep`:
+
+    ``` sh
+    sudo qemu-nbd -d /dev/nbd0
+    ```
