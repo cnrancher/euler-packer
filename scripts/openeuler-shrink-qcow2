@@ -1,8 +1,12 @@
 #!/bin/bash
 set -e
 
+function errcho() {
+   >&2 echo $@;
+}
+
 if [[ "$(command uname -s)" == "Darwin" ]]; then
-    echo "Shrink qcow2 does not support MacOS!"
+    errcho "Shrink qcow2 does not support MacOS!"
     exit 1
 fi
 
@@ -22,7 +26,7 @@ echo "---- qemu-utils installed"
 type partprobe
 
 if [[ -z "${VERSION}" ]]; then
-    echo "---- Failed to shrink disk size: environment VERSION required!"
+    errcho "---- Failed to shrink disk size: environment VERSION required!"
     exit 1
 else
     echo "---- VERSION: ${VERSION}"

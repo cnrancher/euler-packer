@@ -3,8 +3,12 @@ set -e -x
 
 cd $(dirname $0)/../openeuler/aws
 
+function errcho() {
+   >&2 echo $@;
+}
+
 if [ -z "$AWS_ACCESS_KEY_ID" ]; then
-    echo AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be set
+    errcho "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be set"
 fi
 
 if [ -z "${OPENEULER_VERSION}" ]; then

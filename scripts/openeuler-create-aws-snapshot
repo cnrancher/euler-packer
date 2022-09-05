@@ -5,6 +5,10 @@ set -e
 type aws
 type jq
 
+function errcho() {
+   >&2 echo $@;
+}
+
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     echo "Usage: "
     echo "      BUCKET_NAME=<bucket name> REGION=<bucket region> VERSION=<version> ARCH=<arch> $0"
@@ -14,34 +18,34 @@ if [[ "$1" == "-h" || "$1" == "--help" ]]; then
 fi
 
 if [[ -z "${AWS_ACCESS_KEY_ID}" || -z "${AWS_SECRET_ACCESS_KEY}" ]]; then
-    echo "AWS cli not configured!"
-    echo "Please set 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' environment variable."
+    errcho "AWS cli not configured!"
+    errcho "Please set 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' environment variable."
     exit 1
 fi
 
 if [[ -z "${BUCKET_NAME}" ]]; then
-    echo "environment BUCKET_NAME needed!"
+    errcho "environment BUCKET_NAME needed!"
     exit 1
 else
-    echo "BUCKET_NAME: $BUCKET_NAME"
+    errcho "BUCKET_NAME: $BUCKET_NAME"
 fi
 
 if [[ -z "${REGION}" ]]; then
-    echo "environment REGION needed!"
+    errcho "environment REGION needed!"
     exit 1
 else
     echo "REGION: $REGION"
 fi
 
 if [[ -z "${VERSION}" ]]; then
-    echo "Failed to shrink disk size: environment VERSION required!"
+    errcho "Failed to shrink disk size: environment VERSION required!"
     exit 1
 else
     echo "VERSION: ${VERSION}"
 fi
 
 if [[ -z "${ARCH}" ]]; then
-    echo "environment ARCH not specified, set to default: x86_64"
+    errcho "environment ARCH not specified, set to default: x86_64"
     ARCH=x86_64
 else
     echo "ARCH: ${ARCH}"
@@ -152,7 +156,7 @@ do
 done
 SNAPSHOT_ID=$(cat import-output.txt | jq -r ".ImportSnapshotTasks[0].SnapshotTaskDetail.SnapshotId")
 if [[ -z "SNAPSHOT_ID" ]]; then
-   echo "---- Failed to get snapshot id"
+   errcho "---- Failed to get snapshot id"
 else
    echo "---- shapshot id: $SNAPSHOT_ID"
 fi
@@ -161,9 +165,9 @@ echo "----- Creating AMI image..."
 if [[ "${ARCH}" == "x86_64" ]]; then
    AWS_ARCH="x86_64"
 elif [[ "${ARCH}" == "aarch64" ]]; then
-   AWS_ARCH="aarch64"
+   AWS_ARCH="arm64"
 else
-   echo "Unsupported Arch: ${ARCH}"
+   errcho "Unsupported Arch: ${ARCH}"
    exit 1
 fi
 
