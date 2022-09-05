@@ -131,16 +131,10 @@ echo "---- Created."
 aws iam put-role-policy --role-name vmimport --policy-name vmimport --policy-document file://role-policy.json
 
 echo "---- Importing image..."
-cat << EOF > container.json
-{
-	"Description": "openEuler ${VERSION} ${ARCH} from qcow2 image, disk size 8G",
-	"Format": "raw",
-	"Url": "https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com/${OPENEULER_IMG}.raw"
-}
-EOF
 aws ec2 import-snapshot \
-   --description "openEuler import task" \
-   --disk-container file://container.json > import-output.txt
+   --description "openEuler RAW image import task" \
+   --disk-container \
+   "Format=RAW,UserBucket={S3Bucket=${BUCKET_NAME},S3Key=${OPENEULER_IMG}.raw}" > import-output.txt
 cat import-output.txt
 echo "---- Import task created."
 
