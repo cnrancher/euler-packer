@@ -8,7 +8,7 @@
     "builders": [
         {
             "type": "amazon-ebs",
-            "name": "amazon-ebs-hvm",
+            "name": "amazon-ebs-hvm-arm64",
             "region": "ap-northeast-1",
             "ami_regions": [
                 "ap-northeast-1",
@@ -18,10 +18,10 @@
             "source_ami_filter": {
                 "owners": ["852061510766"]
             },
-            "instance_type": "t3a.micro",
+            "instance_type": "t4g.micro",
             "ssh_username": "root",
             "ssh_password": "openEuler12#$",
-            "ami_name": "openEuler-{{user `version`}}-{{user `arch`}}-hvm-{{user `build`}}",
+            "ami_name": "openEuler-{{user `version`}}-arm64-hvm-{{user `build`}}",
             "ena_support": "true"
         }
     ],

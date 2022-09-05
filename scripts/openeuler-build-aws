@@ -44,4 +44,12 @@ fi
 
 export OPENEULER_ARCH=${OPENEULER_ARCH}
 export AWS_BASE_AMI=${AWS_BASE_AMI}
-packer build ${FILE:-openeuler-aws-amis.json}
+if [[ "${OPENEULER_ARCH}" == "x86_64" ]]; then
+packer build ${FILE:-openeuler-aws-amis-x86_64.json}
+elif [[ "${OPENEULER_ARCH}" == "aarch64" ]]; then
+packer build ${FILE:-openeuler-aws-amis-arm64.json}
+else
+    errcho "Unsupported Arch: ${OPENEULER_ARCH}"
+    errcho "Only x86_64 and aarch64 are supported."
+    exit 1
+fi
