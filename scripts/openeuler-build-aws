@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e -x
+set -e
 
 cd $(dirname $0)/../openeuler/aws
 
@@ -7,7 +7,7 @@ function errcho() {
    >&2 echo $@;
 }
 
-if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+if [[ -z "${AWS_ACCESS_KEY_ID}" || -z "${AWS_SECRET_ACCESS_KEY}" ]]; then
     errcho "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be set"
 fi
 
