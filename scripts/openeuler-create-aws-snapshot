@@ -158,11 +158,20 @@ else
 fi
 
 echo "----- Creating AMI image..."
+if [[ "${ARCH}" == "x86_64" ]]; then
+   AWS_ARCH="x86_64"
+elif [[ "${ARCH}" == "aarch64" ]]; then
+   AWS_ARCH="aarch64"
+else
+   echo "Unsupported Arch: ${ARCH}"
+   exit 1
+fi
+
 aws ec2 register-image \
     --name "DEV-${OPENEULER_IMG}-BASE" \
     --description "DEV openEuler image, do not use for production!" \
     --root-device-name /dev/xvda \
-    --architecture x86_64 \
+    --architecture ${AWS_ARCH} \
     --ena-support \
     --virtualization-type hvm \
     --block-device-mappings \
