@@ -21,7 +21,7 @@
             "instance_type": "t3a.micro",
             "ssh_username": "root",
             "ssh_password": "openEuler12#$",
-            "ami_name": "openEuler-{{user `version`}}-hvm-{{user `build`}}",
+            "ami_name": "openEuler-{{user `version`}}-{{user `arch`}}-hvm-{{user `build`}}",
             "ena_support": "true"
         }
     ],
