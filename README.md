@@ -39,11 +39,11 @@ These scripts are used to create openEuler cloud image for AWS.
     ```
 
     - Environment variables:
-      - `OPENEULER_VERSION`: openEuler version, default is 22.03-LTS
+      - `OPENEULER_VERSION`: openEuler version, default is `22.03-LTS`
       - `AWS_BASE_AMI`: base AMI id, required if not executed `make prep`
-      - `OPENEULER_ARCH`: openEuler arch, default is x86_64
+      - `OPENEULER_ARCH`: openEuler arch, default is `x86_64`
 
-4. Finally packer will create a AMI image with its name format `openEuler-<VERSION>-hvm-<NUMBER>`.
+4. Finally packer will create a AMI image with its name format `openEuler-<VERSION>-<ARCH>-hvm-<NUMBER>`.
 
 ### Environment variables
 
@@ -64,3 +64,5 @@ These scripts are used to create openEuler cloud image for AWS.
     ``` sh
     sudo qemu-nbd -d /dev/nbd0
     ```
+
+- Currently openEuler aarch64 does not have [ENA](https://github.com/amzn/amzn-drivers/tree/master/kernel/linux/ena) driver installed in kernel, this project use a workaround to download pre-build ENA kernel module from AWS s3 bucket (`s3://${AWS_BUCKET_NAME}/ena.ko`) and install into system when creating openEuler RAW image.
