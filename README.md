@@ -66,3 +66,5 @@ These scripts are used to create openEuler cloud image for AWS.
     ```
 
 - Currently openEuler aarch64 does not have [ENA](https://github.com/amzn/amzn-drivers/tree/master/kernel/linux/ena) driver installed in kernel, this project use a workaround to download pre-build ENA kernel module from AWS s3 bucket (`s3://${AWS_BUCKET_NAME}/ena.ko`) and install into system when creating openEuler RAW image.
+
+    > Do not delete `/root/ena.ko` or the ec2 instance will failed to connect to the internet.
