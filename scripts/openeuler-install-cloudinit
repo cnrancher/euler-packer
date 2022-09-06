@@ -23,8 +23,8 @@ yum -y install vim tar make zip gzip wget git tmux \
 # Add `apparmor=0` in kernel parameter to disable Apparmor
 echo "GRUB_CMDLINE_LINUX_DEFAULT=\"apparmor=0\"" >> /etc/default/grub
 
-if [[ ARCH == "x86_64" ]]; then
+if [[ "$ARCH" == "x86_64" ]]; then
     grub2-mkconfig -o /boot/grub2/grub.cfg
-elif [[ ARCH == "aarch64" ]]; then
+elif [[ "$ARCH" == "aarch64" ]]; then
     grub2-mkconfig -o /boot/efi/EFI/openEuler/grub.cfg
 fi

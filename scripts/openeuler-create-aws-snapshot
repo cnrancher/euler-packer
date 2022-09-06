@@ -64,7 +64,9 @@ if [[ "${EXISTS}" == "false" ]]; then
 else
    echo "---- File ${OPENEULER_IMG}.raw already uploaded on S3, delete and re-upload it?"
    read -p "---- [y/N]: " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || DELETE="false"
-   if [[ DELETE != "false" ]]; then
+   if [[ "$DELETE" == "false" ]]; then
+      echo "----- Skip re-upload."
+   else
       aws s3 rm s3://${BUCKET_NAME}/${OPENEULER_IMG}.raw
       aws s3 cp ${OPENEULER_IMG}.raw s3://${BUCKET_NAME}/
    fi
