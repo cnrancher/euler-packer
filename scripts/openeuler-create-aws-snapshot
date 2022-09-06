@@ -38,7 +38,7 @@ else
 fi
 
 if [[ -z "${VERSION}" ]]; then
-    errcho "Failed to shrink disk size: environment VERSION required!"
+    errcho "environment VERSION required!"
     exit 1
 else
     echo "VERSION: ${VERSION}"
@@ -164,10 +164,15 @@ fi
 echo "----- Creating AMI image..."
 if [[ "${ARCH}" == "x86_64" ]]; then
    AWS_ARCH="x86_64"
+   AWS_ENA="--ena-support"
 elif [[ "${ARCH}" == "aarch64" ]]; then
    AWS_ARCH="arm64"
+   # openEuler aarch64 does not support ena kernel module by default,
+   # Do not enable ENA for arm64 images
+   AWS_ENA="--no-ena-support"
 else
    errcho "Unsupported Arch: ${ARCH}"
+   errcho "Valid ARCH: x86_64 or aarch64"
    exit 1
 fi
 
@@ -176,7 +181,7 @@ aws ec2 register-image \
     --description "DEV openEuler image, do not use for production!" \
     --root-device-name /dev/xvda \
     --architecture ${AWS_ARCH} \
-    --ena-support \
+    ${AWS_ENA} \
     --virtualization-type hvm \
     --block-device-mappings \
       DeviceName=/dev/xvda,Ebs={SnapshotId=${SNAPSHOT_ID}} > register-image.txt
