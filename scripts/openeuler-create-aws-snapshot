@@ -57,12 +57,17 @@ cd $(dirname $0)/../tmp
 echo "---- Current dir: $(pwd)"
 
 echo "---- Uploading RAW image to S3 Bucket..."
-exists=$(aws s3 ls ${BUCKET_NAME}/${OPENEULER_IMG}.raw || echo -n "false")
-if [[ "${exists}" == "false" ]]; then
+EXISTS=$(aws s3 ls ${BUCKET_NAME}/${OPENEULER_IMG}.raw || echo -n "false")
+if [[ "${EXISTS}" == "false" ]]; then
    echo "--- aws s3 cp"
    aws s3 cp ${OPENEULER_IMG}.raw s3://${BUCKET_NAME}/
 else
-   echo "---- File ${OPENEULER_IMG}.raw already exist, skip uploading."
+   echo "---- File ${OPENEULER_IMG}.raw already uploaded on S3, delete and re-upload it?"
+   read -p "---- [y/N]: " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || DELETE="false"
+   if [[ DELETE != "false" ]]; then
+      aws s3 rm s3://${BUCKET_NAME}/${OPENEULER_IMG}.raw
+      aws s3 cp ${OPENEULER_IMG}.raw s3://${BUCKET_NAME}/
+   fi
 fi
 
 echo "---- Creating vmimport policy..."
