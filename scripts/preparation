@@ -11,8 +11,6 @@ export OPENEULER_VERSION="${OPENEULER_VERSION:=22.03-LTS}"
 export SUSEEULER_VERSION=""
 # AWS s3 bucket name
 export AWS_BUCKET_NAME="${AWS_BUCKET_NAME}"
-# AWS region, e.g. ap-northeast-1
-export AWS_REGION="${AWS_REGION:=ap-northeast-1}"
 
 # TODO: Add aliyun
 
@@ -25,6 +23,6 @@ fi
 cd $(dirname $0)
 
 # Shrink qcow2 image size to 8GB and convert it to RAW image
-VERSION="${OPENEULER_VERSION}" ARCH="${OPENEULER_ARCH}" BUCKET_NAME="${AWS_BUCKET_NAME}" ./openeuler-shrink-qcow2
+VERSION="${OPENEULER_VERSION}" ARCH="${OPENEULER_ARCH}" ./openeuler-shrink-qcow2
 # Upload RAW image to AWS s3 bucket and create snapshot from it
-VERSION="${OPENEULER_VERSION}" ARCH="${OPENEULER_ARCH}" REGION="${AWS_REGION}" BUCKET_NAME="${AWS_BUCKET_NAME}" ./openeuler-create-aws-snapshot
+VERSION="${OPENEULER_VERSION}" ARCH="${OPENEULER_ARCH}" BUCKET_NAME="${AWS_BUCKET_NAME}" ./openeuler-create-aws-snapshot

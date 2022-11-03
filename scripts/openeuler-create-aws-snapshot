@@ -11,15 +11,15 @@ function errcho() {
 
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     echo "Usage: "
-    echo "      BUCKET_NAME=<bucket name> REGION=<bucket region> VERSION=<version> ARCH=<arch> $0"
+    echo "      BUCKET_NAME=<bucket name> VERSION=<version> ARCH=<arch> $0"
     echo "Example: "
-    echo "      BUCKET_NAME=example-bucket REGION=ap-northeast-1 VERSION=22.03-LTS ARCH=x86_64 $0"
+    echo "      BUCKET_NAME=example-bucket VERSION=22.03-LTS ARCH=x86_64 $0"
     exit 0
 fi
 
-if [[ -z "${AWS_ACCESS_KEY_ID}" || -z "${AWS_SECRET_ACCESS_KEY}" ]]; then
+if [[ ! -e "${HOME}/.aws/config" ]]; then
     errcho "AWS cli not configured!"
-    errcho "Please set 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' environment variable."
+    errcho "Please run 'aws configure' before running this script"
     exit 1
 fi
 
@@ -28,13 +28,6 @@ if [[ -z "${BUCKET_NAME}" ]]; then
     exit 1
 else
     errcho "BUCKET_NAME: $BUCKET_NAME"
-fi
-
-if [[ -z "${REGION}" ]]; then
-    errcho "environment REGION needed!"
-    exit 1
-else
-    echo "REGION: $REGION"
 fi
 
 if [[ -z "${VERSION}" ]]; then
