@@ -88,8 +88,8 @@ echo "---- Resizing ext4 file system size..."
 sudo resize2fs ${DEV_NUM}p2 6G
 sudo sync
 
-# Install NBD kernel module for openEuler aarch64
-if [[ "${ARCH}" == "aarch64" ]]; then
+# Install ENA kernel module for openEuler aarch64
+if [[ "${ARCH}" == "aarch64" && "${VERSION}" == "22.03-LTS" ]]; then
     echo "----- Installing ENA kernel module for aarch64"
     # Create a mountpoint folder
     mkdir -p mnt
@@ -97,22 +97,21 @@ if [[ "${ARCH}" == "aarch64" ]]; then
     sudo mount /dev/nbd0p2 mnt
     sudo mount /dev/nbd0p1 mnt/boot
 
-    EXISTS=$(aws s3 ls ${BUCKET_NAME}/ena.ko || echo -n "false")
-    if [[ "${EXISTS}" != "false" ]]; then
-        # Download pre-compiled ENA kernel module from AWS S3 bucket
-        aws s3 cp "s3://${BUCKET_NAME}/ena.ko" ./
+    # Download pre-compiled ENA kernel module from AWS S3 bucket
+    wget "https://starry-ena-driver-openeuler.s3.ap-northeast-1.amazonaws.com/${VERSION}/ena.ko" || echo "----- Download failed"
+    if [[ -e "ena.ko" ]]; then
         # Move kernel module to root home dir
         sudo mv ./ena.ko mnt/root/
         # Create configuration for modprobe
         sudo bash -c ' echo "install ena insmod /root/ena.ko" >> mnt/etc/modprobe.d/ena.conf '
         # Auto load module when startup
         sudo bash -c ' echo "ena" >> mnt/etc/modules-load.d/ena.conf '
+        sudo sync
+        sudo umount -R mnt
+        echo "----- Install finished"
     else
-        errcho "Failed to install ENA kernel module: module does not exists on AWS s3 bucket"
+        echo "----- Failed to download ena.ko from S3 bucket"
     fi
-    sudo sync
-    sudo umount -R mnt
-    echo "----- Install finished"
 fi
 
 # Add some timeout to avoid device busy error
