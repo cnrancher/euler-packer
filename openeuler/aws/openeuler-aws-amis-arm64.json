@@ -3,7 +3,8 @@
         "version": "{{env `OPENEULER_VERSION`}}",
         "build": "{{env `AWS_IMAGE_BUILD_NUMBER`}}",
         "arch": "{{env `OPENEULER_ARCH`}}",
-        "ami_id": "{{env `AWS_BASE_AMI`}}"
+        "ami_id": "{{env `AWS_BASE_AMI`}}",
+        "owner_id": "{{env `AWS_BASE_AMI_OWNER_ID`}}"
     },
     "builders": [
         {
@@ -16,7 +17,7 @@
             ],
             "source_ami": "{{user `ami_id`}}",
             "source_ami_filter": {
-                "owners": ["852061510766"]
+                "owners": ["{{user `owner_id`}}"]
             },
             "instance_type": "t4g.micro",
             "ssh_username": "root",

@@ -23,7 +23,7 @@ These scripts are used to create openEuler cloud image for AWS.
         make prep
     ```
 
-    - Environment variables:
+    Environment variables:
        - `AWS_BUCKET_NAME`: AWS S3 bucket name, required
        - `OPENEULER_ARCH`: openEuler arch, default is x86_64
        - `OPENEULER_VERSION`: openEuler version, default is `22.03-LTS`
@@ -34,13 +34,15 @@ These scripts are used to create openEuler cloud image for AWS.
     OPENEULER_VERSION=<version> \
         AWS_BASE_AMI=<base_ami_id> \
         OPENEULER_ARCH=<arch> \
+        AWS_BASE_AMI_OWNER_ID=<ower_id> \
         make build
     ```
 
-    - Environment variables:
+    Environment variables:
       - `OPENEULER_VERSION`: openEuler version, default is `22.03-LTS`
       - `AWS_BASE_AMI`: base AMI id, required if not executed `make prep`
       - `OPENEULER_ARCH`: openEuler arch, default is `x86_64`
+      - `AWS_BASE_AMI_OWNER_ID`: The user ID of base AMI
 
 4. Finally packer will create a AMI image with its name format `openEuler-<VERSION>-<ARCH>-hvm-<NUMBER>`.
 

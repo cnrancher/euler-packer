@@ -29,11 +29,16 @@ if [ -z "${AWS_BASE_AMI}" ]; then
         fi
         echo "Found AWS_BASE_AMI: $AWS_BASE_AMI"
     else
-        echo "AWS_BASE_AMI environment must be specified!"
+        echo "AWS_BASE_AMI environment variable must be specified!"
         exit 1
     fi
 else
     echo "AWS_BASE_AMI: ${AWS_BASE_AMI}"
+fi
+
+if [ -z "${AWS_BASE_AMI_OWNER_ID}" ]; then
+    errcho "AWS_BASE_AMI_OWNER_ID environment variable must be specified!"
+    exit 1
 fi
 
 if [ -z "${OPENEULER_ARCH}" ]; then
@@ -45,10 +50,11 @@ fi
 
 export OPENEULER_ARCH=${OPENEULER_ARCH}
 export AWS_BASE_AMI=${AWS_BASE_AMI}
+export AWS_BASE_AMI_OWNER_ID=${AWS_BASE_AMI_OWNER_ID}
 if [[ "${OPENEULER_ARCH}" == "x86_64" ]]; then
-packer build ${FILE:-openeuler-aws-amis-x86_64.json}
+    packer build ${FILE:-openeuler-aws-amis-x86_64.json}
 elif [[ "${OPENEULER_ARCH}" == "aarch64" ]]; then
-packer build ${FILE:-openeuler-aws-amis-arm64.json}
+    packer build ${FILE:-openeuler-aws-amis-arm64.json}
 else
     errcho "Unsupported Arch: ${OPENEULER_ARCH}"
     errcho "Only x86_64 and aarch64 are supported."
