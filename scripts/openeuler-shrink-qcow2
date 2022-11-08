@@ -101,9 +101,10 @@ if [[ "${ARCH}" == "aarch64" && "${VERSION}" == "22.03-LTS" ]]; then
     wget "https://starry-ena-driver-openeuler.s3.ap-northeast-1.amazonaws.com/${VERSION}/ena.ko" || echo "----- Download failed"
     if [[ -e "ena.ko" ]]; then
         # Move kernel module to root home dir
-        sudo mv ./ena.ko mnt/root/
+        sudo mkdir -p mnt/opt/ena-driver/
+        sudo mv ./ena.ko mnt/opt/ena-driver/
         # Create configuration for modprobe
-        sudo bash -c ' echo "install ena insmod /root/ena.ko" >> mnt/etc/modprobe.d/ena.conf '
+        sudo bash -c ' echo "install ena insmod /opt/ena-driver/ena.ko" >> mnt/etc/modprobe.d/ena.conf '
         # Auto load module when startup
         sudo bash -c ' echo "ena" >> mnt/etc/modules-load.d/ena.conf '
         sudo sync
