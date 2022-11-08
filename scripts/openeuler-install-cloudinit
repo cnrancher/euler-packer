@@ -16,6 +16,9 @@ echo "type: $PACKER_BUILDER_TYPE"
 echo "name: $PACKER_BUILD_NAME"
 echo "----------------------------------------"
 
+# Delete default root password
+passwd -d root
+
 yum -y update
 yum -y install cloud-init cloud-utils-growpart gdisk
 yum -y install vim tar make zip gzip wget git tmux \
