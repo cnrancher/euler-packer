@@ -9,6 +9,7 @@ function errcho() {
 
 if [[ -z "${AWS_ACCESS_KEY_ID}" || -z "${AWS_SECRET_ACCESS_KEY}" ]]; then
     errcho "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be set"
+    exit 1
 fi
 
 if [ -z "${OPENEULER_VERSION}" ]; then
