@@ -51,6 +51,7 @@ fi
 export OPENEULER_ARCH=${OPENEULER_ARCH}
 export AWS_BASE_AMI=${AWS_BASE_AMI}
 export AWS_BASE_AMI_OWNER_ID=${AWS_BASE_AMI_OWNER_ID}
+export CURRENT_TIME=$(date +"%Y%d%m-%H%M")
 if [[ "${OPENEULER_ARCH}" == "x86_64" ]]; then
     packer build ${FILE:-openeuler-aws-amis-x86_64.json}
 elif [[ "${OPENEULER_ARCH}" == "aarch64" ]]; then

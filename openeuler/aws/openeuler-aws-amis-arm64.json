@@ -1,10 +1,10 @@
 {
     "variables": {
         "version": "{{env `OPENEULER_VERSION`}}",
-        "build": "{{env `AWS_IMAGE_BUILD_NUMBER`}}",
         "arch": "{{env `OPENEULER_ARCH`}}",
         "ami_id": "{{env `AWS_BASE_AMI`}}",
-        "owner_id": "{{env `AWS_BASE_AMI_OWNER_ID`}}"
+        "owner_id": "{{env `AWS_BASE_AMI_OWNER_ID`}}",
+        "current_time": "{{env `CURRENT_TIME`}}"
     },
     "builders": [
         {
@@ -22,7 +22,7 @@
             "instance_type": "t4g.micro",
             "ssh_username": "root",
             "ssh_password": "openEuler12#$",
-            "ami_name": "openEuler-{{user `version`}}-arm64-hvm-{{user `build`}}",
+            "ami_name": "openEuler-{{user `version`}}-arm64-hvm-{{user `current_time`}}",
             "ena_support": "true"
         }
     ],
