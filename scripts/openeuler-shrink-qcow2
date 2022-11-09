@@ -85,7 +85,7 @@ sudo fdisk -l "${DEV_NUM}"
 echo "lsblk:"
 lsblk -f
 # echo "---- Running e2fsck..."
-# e2fsck -fy /dev/nbd0p2
+# e2fsck -fy ${DEV_NUM}p2
 echo "---- Resizing ext4 file system size..."
 sudo resize2fs ${DEV_NUM}p2 6G
 sudo sync
@@ -96,8 +96,8 @@ if [[ "${ARCH}" == "aarch64" && "${VERSION}" == "22.03-LTS" ]]; then
     # Create a mountpoint folder
     mkdir -p mnt
     # Mount root and boot partition to mountpoint
-    sudo mount /dev/nbd0p2 mnt
-    sudo mount /dev/nbd0p1 mnt/boot
+    sudo mount ${DEV_NUM}p2 mnt
+    sudo mount ${DEV_NUM}p1 mnt/boot
 
     # Download pre-compiled ENA kernel module from AWS S3 bucket
     wget "https://starry-ena-driver-openeuler.s3.ap-northeast-1.amazonaws.com/${VERSION}/ena.ko" || echo "----- Download failed"
@@ -118,14 +118,16 @@ if [[ "${ARCH}" == "aarch64" && "${VERSION}" == "22.03-LTS" ]]; then
 fi
 
 # Add some timeout to avoid device busy error
-sleep 3
+sleep 1
 # Reload partition table to avoid device or resource busy
 echo "---- Reloading partition table..."
-sudo partprobe /dev/nbd0
-sleep 3
+sudo partprobe ${DEV_NUM}
+sleep 1
 echo "---- Resizing partition size..."
+# Reset fdisk error status
+echo -n "0" > $(dirname $0)/../tmp/fdisk_failed_ioctl
 # Refer: https://superuser.com/questions/332252/how-to-create-and-format-a-partition-using-a-bash-script
-sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | sudo fdisk ${DEV_NUM}
+sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | sudo fdisk ${DEV_NUM} || echo -n "1" > $(dirname $0)/../tmp/fdisk_failed_ioctl
   p # print current partition
   d # delete partition
   2 # partition number 2
@@ -140,9 +142,29 @@ sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | sudo fdisk ${DEV_NUM}
 EOF
 
 sudo sync
-sudo qemu-nbd -d /dev/nbd0
+sleep 1
+sudo partprobe ${DEV_NUM}
+sleep 1
+
+echo "---- Check fdisk command succeed or not"
+pwd
+cd $(dirname $0)/../
+# If fdisk failed with device busy error, check the root partition is resized to 6G or not
+if [[ "$(cat tmp/fdisk_failed_ioctl)" == "1" ]]; then
+    echo "---- fdisk executes failed, check root device is shinked to 6G or not"
+    check_root_size=$(lsblk | grep p2 | grep 6G || echo "")
+    if [[ -z ${check_root_size} ]]; then
+        lsblk
+        errcho "---- Failed to shrink root partition size to 6G"
+        exit 1
+    fi
+    echo "---- root partition already shrinked to 6G"
+fi
+
+sudo qemu-nbd -d ${DEV_NUM}
 
 echo "---- Shrinking qcow2 image size..."
+cd tmp/
 qemu-img resize ${OPENEULER_IMG}.qcow2 --shrink 8G
 qemu-img info ${OPENEULER_IMG}.qcow2
 
