@@ -9,6 +9,7 @@
 	@echo "Usage:"
 	@echo "    make prep  -- Prepare AWS base AMI image."
 	@echo "    make build -- Create AMI image from base image by using packer."
+	@echo "    make clean -- Delete temporary files in 'tmp' folder."
 
 build: .dapper
 	./.dapper
