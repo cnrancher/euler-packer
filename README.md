@@ -81,7 +81,7 @@ Usage:
 
     After running `make prep`, you may find the generated "Base AMI image" with its name format `DEV-openEuler-<VERSION>-<ARCH>-<DATETIME>-BASE`
 
-    > "Base AMI Image" simply built by shrinking the qcow2 partition size and convert it to RAW and upload it to S3 bucket and generated AMI from this RAW image stored in S3. This image does not have `cloud-init` installed and user can login to the instance by using the default root password of openEuler, so **this image is not safe and not recommended to use in production**.
+    > "Base AMI Image" simply built by shrinking the qcow2 partition size and convert it to RAW and upload it to S3 bucket and generat AMI from this RAW image stored in S3. This image does not have `cloud-init` installed and user can login to the instance by using the default root password of openEuler, so **this image is not completely safe and not recommended to use in production**.
 
 3. Use packer to create AMI image from base AMI image: `make build`
 
@@ -120,7 +120,7 @@ Usage:
     sudo qemu-nbd -d /dev/nbd0
     ```
 
-- `make prep` make fail when shirinking partition size, with error message `run 'e2fsck -f /dev/nbd0p2' first` or device is busy etc... Run following command and try to re-run `make prep` again.
+- `make prep` may fail when shirinking partition size, with error message `run 'e2fsck -f /dev/nbd0p2' first` or device is busy etc... Run following command and try to re-run `make prep` again.
 
     ```
     # If the error message is about 'e2fsck', run:
