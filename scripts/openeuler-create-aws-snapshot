@@ -172,8 +172,9 @@ else
    exit 1
 fi
 
+CURRENT_TIME=$(date +"%Y%d%m-%H%M")
 aws ec2 register-image \
-    --name "DEV-${OPENEULER_IMG}-BASE" \
+    --name "DEV-${OPENEULER_IMG}-${CURRENT_TIME}-BASE" \
     --description "DEV openEuler image, do not use for production!" \
     --root-device-name /dev/xvda \
     --architecture ${AWS_ARCH} \
