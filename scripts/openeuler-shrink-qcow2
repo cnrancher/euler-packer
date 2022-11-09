@@ -24,6 +24,8 @@ type qemu-nbd
 echo "---- qemu-utils installed"
 # Ensure partprobe exists
 type partprobe
+# Ensure awscli installed
+type aws
 
 if [[ -z "${VERSION}" ]]; then
     errcho "---- Failed to shrink disk size: environment VERSION required!"
