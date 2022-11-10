@@ -23,7 +23,8 @@ passwd -l root
 yum -y update
 yum -y install cloud-init cloud-utils-growpart gdisk
 yum -y install vim tar make zip gzip wget git tmux \
-    conntrack-tools socat iptables-services htop open-iscsi
+    conntrack-tools socat iptables-services htop open-iscsi \
+    qemu-guest-agent
 # Add `apparmor=0` in kernel parameter to disable Apparmor
 echo "GRUB_CMDLINE_LINUX_DEFAULT=\"apparmor=0\"" >> /etc/default/grub
 

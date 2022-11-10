@@ -1,0 +1,50 @@
+#!/bin/bash
+set -e
+
+cd $(dirname $0)/../openeuler/qemu
+
+function errcho() {
+   >&2 echo $@;
+}
+
+if [[ "${OPENEULER_ARCH}" == "x86_64" ]]; then
+    type qemu-system-x86_64
+elif [[ "${OPENEULER_ARCH}" == "aarch64" ]]; then
+    type qemu-system-aarch64
+else
+    errcho "Unsupported Arch: ${OPENEULER_ARCH}"
+    errcho "Only x86_64 and aarch64 are supported."
+    exit 1
+fi
+
+function errcho() {
+   >&2 echo $@;
+}
+
+if [ -z "${OPENEULER_VERSION}" ]; then
+    OPENEULER_VERSION="22.03-LTS"
+    echo "OPENEULER_VERSION not found, set to default: 22.03-LTS"
+else
+    echo "OPENEULER_VERSION: ${OPENEULER_VERSION}"
+fi
+
+if [ -z "${OPENEULER_ARCH}" ]; then
+    echo "OPENEULER_ARCH not specified, set to x86_64"
+    OPENEULER_ARCH="x86_64"
+else
+    echo "OPENEULER_ARCH: ${OPENEULER_ARCH}"
+fi
+
+export OPENEULER_VERSION=${OPENEULER_VERSION}
+export OPENEULER_ARCH=${OPENEULER_ARCH}
+export CURRENT_TIME=$(date +"%Y%d%m-%H%M")
+if [[ "${OPENEULER_ARCH}" == "x86_64" ]]; then
+    packer build ${FILE:-openeuler-qeum-x86_64.pkr.hcl}
+# elif [[ "${OPENEULER_ARCH}" == "aarch64" ]]; then
+#    packer build ${FILE:-openeuler-qeum-arm64.pkr.hcln}
+else
+    errcho "Unsupported Arch: ${OPENEULER_ARCH}"
+    errcho "Only x86_64 is supported."
+#    errcho "Only x86_64 and aarch64 are supported."
+    exit 1
+fi
