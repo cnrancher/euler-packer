@@ -2,3 +2,4 @@
 Dockerfile.dapper*
 !Dockerfile.dapper
 /tmp
+.vscode

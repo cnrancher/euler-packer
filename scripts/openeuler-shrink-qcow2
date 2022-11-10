@@ -24,8 +24,6 @@ type qemu-nbd
 echo "---- qemu-utils installed"
 # Ensure partprobe exists
 type partprobe
-# Ensure awscli installed
-type aws
 
 if [[ -z "${VERSION}" ]]; then
     errcho "---- Failed to shrink disk size: environment VERSION required!"
@@ -171,8 +169,6 @@ qemu-img info ${OPENEULER_IMG}.qcow2
 echo "---- Converting ${OPENEULER_IMG}.qcow2 to RAW image..."
 qemu-img convert ${OPENEULER_IMG}.qcow2 ${OPENEULER_IMG}.raw
 
-echo "---- Clean up:"
-rm ${OPENEULER_IMG}.qcow2
 ls -alh
 
 echo "---- $0 Done."

@@ -22,7 +22,5 @@ fi
 # Ensure current dir is `scripts`
 cd $(dirname $0)
 
-# Shrink qcow2 image size to 8GB and convert it to RAW image
-VERSION="${OPENEULER_VERSION}" ARCH="${OPENEULER_ARCH}" ./openeuler-shrink-qcow2
 # Upload RAW image to AWS s3 bucket and create snapshot from it
 VERSION="${OPENEULER_VERSION}" ARCH="${OPENEULER_ARCH}" BUCKET_NAME="${AWS_BUCKET_NAME}" ./openeuler-create-aws-snapshot

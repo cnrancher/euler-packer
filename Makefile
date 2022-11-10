@@ -7,16 +7,24 @@
 
 .default:
 	@echo "Usage:"
-	@echo "    make prep  -- Prepare AWS base AMI image."
-	@echo "    make build -- Create AMI image from base image by using packer."
+	@echo "    make base-image  -- Shrink the openEuler qcow2 disk to 8G and use it as the base image."
+	@echo "    make aws-image -- Create AMI image from base image by using packer."
+	@echo "    make qemu-image -- Create qemu image from base image by using packer."
 	@echo "    make clean -- Delete temporary files in 'tmp' folder."
 
-build: .dapper
+base-image:
+	@echo "Building the base image..."
+	./scripts/build-base-image
+
+aws-image: .dapper
+	@echo "Uploading an image to aws s3..."
+	./scripts/upload-to-s3
+	@echo "Building an aws image"
 	./.dapper
 
-prep:
-	@echo "Running preparation..."
-	./scripts/preparation
+qemu-image: base-image
+	@echo "Building a qemu image..."
+	./scripts/openeuler-build-qemu
 
 clean:
 	rm -r ./tmp || echo "tmp folder already deleted"
@@ -26,4 +34,4 @@ clean:
 
 .DEFAULT_GOAL := .default
 
-.PHONY: build prep clean
+.PHONY: base-image aws-image qemu-image clean
