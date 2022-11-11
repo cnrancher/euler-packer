@@ -1,0 +1,27 @@
+FROM ubuntu:22.04
+
+ARG VERSION=22.03-LTS
+ARG DAPPER_HOST_ARCH
+
+ENV VERSION=${VERSION} \
+    ARCH_COMMON=${DAPPER_HOST_ARCH}
+
+# Install utils
+RUN apt-get update
+RUN apt-get install -yq qemu-system-x86 gawk curl wget gnupg software-properties-common jq qemu-utils kmod parted fdisk
+
+# Install packer
+RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add -
+RUN apt-add-repository "deb [arch=${ARCH_COMMON}}] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+RUN apt-get update && apt-get install -yq packer
+
+ENV DAPPER_SOURCE /source
+ENV DAPPER_ENV VERSION TAG CROSS DRONE_TAG REPO DOWNLOAD_MIRROR
+ENV DAPPER_RUN_ARGS --device=/dev/kvm:/dev/kvm -v /lib/modules:/lib/modules -v /dev:/dev --privileged
+ENV DAPPER_OUTPUT ./dist
+ENV DAPPER_DOCKER_SOCKET true
+ENV HOME ${DAPPER_SOURCE}
+WORKDIR ${DAPPER_SOURCE}
+
+ENTRYPOINT ["./scripts/entry"]
+CMD [ "build" ]

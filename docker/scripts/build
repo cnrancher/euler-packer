@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -e
+
+if [ -n "${DEBUG}" ]; then
+    set -v
+fi
+
+cd $(dirname $0)
+
+source ./vars.sh
+
+./download-image.sh
+./shrink-qcow2.sh
