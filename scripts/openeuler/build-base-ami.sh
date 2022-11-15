@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+# Set working dir to root dir of this project
+cd $(dirname $0)/../../
+export WORKING_DIR=$(pwd)
+
 # Ensure awscli and jq are installed
 type aws
 type jq
@@ -8,6 +12,11 @@ type jq
 function errcho() {
    >&2 echo $@;
 }
+
+if [[ $(uname) == "Darwin" ]]; then
+    errcho "MacOS is not supported"
+    exit 1
+fi
 
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     echo "Usage: "
@@ -46,8 +55,15 @@ fi
 
 OPENEULER_IMG="openEuler-${VERSION}-${ARCH}"
 
-cd $(dirname $0)/../tmp
+cd $WORKING_DIR/tmp
 echo "---- Current dir: $(pwd)"
+
+echo "---- Converting BASE-${OPENEULER_IMG}.qcow2 to RAW image..."
+if [[ ! -e "BASE-${OPENEULER_IMG}.qcow2" ]]; then
+   errcho "File 'BASE-${OPENEULER_IMG}.qcow2' not found in 'tmp/' folder!"
+   exit 1
+fi
+qemu-img convert BASE-${OPENEULER_IMG}.qcow2 ${OPENEULER_IMG}.raw
 
 echo "---- Uploading RAW image to S3 Bucket..."
 EXISTS=$(aws s3 ls ${BUCKET_NAME}/${OPENEULER_IMG}.raw || echo -n "false")
@@ -172,7 +188,7 @@ else
    exit 1
 fi
 
-CURRENT_TIME=$(date +"%Y%d%m-%H%M")
+CURRENT_TIME=$(date +"%Y%m%d-%H%M")
 aws ec2 register-image \
     --name "DEV-${OPENEULER_IMG}-${CURRENT_TIME}-BASE" \
     --description "DEV openEuler image, do not use for production!" \

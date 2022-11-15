@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+# This script should be running in the VM launched by packer
+
 function errcho() {
    >&2 echo $@;
 }
@@ -10,10 +12,6 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
-PACKER_BUILDER_TYPE=${PACKER_BUILDER_TYPE:?"PACKER_BUILDER_TYPE is not set"}
-
-echo "type: $PACKER_BUILDER_TYPE"
-echo "name: $PACKER_BUILD_NAME"
 echo "----------------------------------------"
 
 # Delete default root password

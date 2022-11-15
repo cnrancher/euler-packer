@@ -33,7 +33,7 @@
                 "VERSION={{user `version`}}",
                 "ARCH={{user `arch`}}"
             ],
-            "script": "../../scripts/openeuler-install-cloudinit"
+            "script": "../../scripts/openeuler/packer/ami-install-cloud-init.sh"
         }
     ]
 }
