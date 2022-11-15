@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+if [[ "$SKIP_BASE_AMI" == "1" ]]; then
+    echo "Skipping build base AMI image"
+    exit 0
+fi
+
 # openEuler arch, can be x86_64 or aarch64
 export OPENEULER_ARCH="${OPENEULER_ARCH:=x86_64}"
 # suseEuler arch, reserved
@@ -11,16 +16,23 @@ export OPENEULER_VERSION="${OPENEULER_VERSION:=22.03-LTS}"
 export SUSEEULER_VERSION=""
 # AWS s3 bucket name
 export AWS_BUCKET_NAME="${AWS_BUCKET_NAME}"
-
-# TODO: Add aliyun
+# Set working dir
+cd $(dirname $0)/../
+export WORKING_DIR=$(pwd)
 
 if [[ -z "${AWS_BUCKET_NAME}" ]]; then
     echo "AWS_BUCKET_NAME environment required!"
     exit 1
 fi
 
+if [[ $(uname) == "Darwin" ]]; then
+    echo "MacOS is not supported"
+    exit 1
+fi
+
 # Ensure current dir is `scripts`
-cd $(dirname $0)
+cd $WORKING_DIR/scripts/
 
 # Upload RAW image to AWS s3 bucket and create snapshot from it
-VERSION="${OPENEULER_VERSION}" ARCH="${OPENEULER_ARCH}" BUCKET_NAME="${AWS_BUCKET_NAME}" ./openeuler-create-aws-snapshot
+VERSION="${OPENEULER_VERSION}" ARCH="${OPENEULER_ARCH}" BUCKET_NAME="${AWS_BUCKET_NAME}" ./openeuler/build-base-ami.sh
+# VERSION="${SUSEEULER_VERSION}" ARCH="${SUSEEULER_ARCH}" BUCKET_NAME="${AWS_BUCKET_NAME}" ./suseeuler/build-base-ami.sh

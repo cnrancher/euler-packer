@@ -5,6 +5,15 @@ function errcho() {
    >&2 echo $@;
 }
 
+# Set working dir to root dir of this project
+cd $(dirname $0)/../../
+export WORKING_DIR=$(pwd)
+
+if [[ $(uname) == "Darwin" ]]; then
+    errcho "MacOS is not supported"
+    exit 1
+fi
+
 if [[ "$(command uname -s)" == "Darwin" ]]; then
     errcho "Shrink qcow2 does not support MacOS!"
     exit 1
@@ -43,7 +52,7 @@ OPENEULER_IMG="openEuler-${VERSION}-${ARCH}"
 OPENEULER_DOWNLOAD_LINK="https://repo.openeuler.org/openEuler-${VERSION}/virtual_machine_img/${ARCH}/${OPENEULER_IMG}.qcow2.xz"
 
 # Download qcow2 image to tmp folder
-mkdir -p $(dirname $0)/../tmp && cd $(dirname $0)/../tmp
+mkdir -p $WORKING_DIR/tmp && cd $WORKING_DIR/tmp
 if [[ -e "${OPENEULER_IMG}.raw" ]]; then
     echo "---- ${OPENEULER_IMG} already exists, delete and re-create it?"
     read -p "---- [y/N]: " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 0
@@ -123,9 +132,9 @@ sudo partprobe ${DEV_NUM}
 sleep 1
 echo "---- Resizing partition size..."
 # Reset fdisk error status
-echo -n "0" > $(dirname $0)/../tmp/fdisk_failed_ioctl
+echo -n "0" > $WORKING_DIR/tmp/fdisk_failed_ioctl
 # Refer: https://superuser.com/questions/332252/how-to-create-and-format-a-partition-using-a-bash-script
-sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | sudo fdisk ${DEV_NUM} || echo -n "1" > $(dirname $0)/../tmp/fdisk_failed_ioctl
+sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | sudo fdisk ${DEV_NUM} || echo -n "1" > $WORKING_DIR/tmp/fdisk_failed_ioctl
   p # print current partition
   d # delete partition
   2 # partition number 2
@@ -145,10 +154,9 @@ sudo partprobe ${DEV_NUM}
 sleep 1
 
 echo "---- Check fdisk command succeed or not"
-pwd
-cd $(dirname $0)/../
+cd $WORKING_DIR/tmp/
 # If fdisk failed with device busy error, check the root partition is resized to 6G or not
-if [[ "$(cat tmp/fdisk_failed_ioctl)" == "1" ]]; then
+if [[ "$(cat fdisk_failed_ioctl)" == "1" ]]; then
     echo "---- fdisk executes failed, check root device is shinked to 6G or not"
     check_root_size=$(lsblk | grep p2 | grep 6G || echo "")
     if [[ -z ${check_root_size} ]]; then
@@ -162,13 +170,12 @@ fi
 sudo qemu-nbd -d ${DEV_NUM}
 
 echo "---- Shrinking qcow2 image size..."
-cd tmp/
 qemu-img resize ${OPENEULER_IMG}.qcow2 --shrink 8G
 qemu-img info ${OPENEULER_IMG}.qcow2
+echo "---- Finished"
+echo ""
 
-echo "---- Converting ${OPENEULER_IMG}.qcow2 to RAW image..."
-qemu-img convert ${OPENEULER_IMG}.qcow2 ${OPENEULER_IMG}.raw
-
-ls -alh
+mv ${OPENEULER_IMG}.qcow2 SHRINKED-${OPENEULER_IMG}.qcow2
+ls -alh SHRINKED-${OPENEULER_IMG}.qcow2
 
 echo "---- $0 Done."

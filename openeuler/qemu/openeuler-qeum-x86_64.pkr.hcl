@@ -11,11 +11,12 @@ variables {
   version = env("OPENEULER_VERSION")
   build   = env("AWS_IMAGE_BUILD_NUMBER")
   arch =  env("OPENEULER_ARCH")
+  working_dir = env("WORKING_DIR")
 }
 
 source "qemu" "qemu_base_image" {
   disk_image       = true
-  iso_url          = "$(dirname $0)/../../../tmp/openEuler-${var.version}-${var.arch}.qcow2"
+  iso_url          = "${var.working_dir}/tmp/SHRINKED-openEuler-${var.version}-${var.arch}.qcow2"
   iso_checksum     = "none"
   output_directory = "output_openEuler_qemu"
   shutdown_command = "echo 'packer' | sudo -S shutdown -P now"
@@ -47,7 +48,6 @@ build {
       "VERSION=${var.version}",
       "ARCH=${var.arch}",
     ]
-    script = "../../scripts/openeuler-initialization-qeum"
+    script = "../../scripts/openeuler/packer/qemu-install-cloud-init.sh"
   }
 }
-

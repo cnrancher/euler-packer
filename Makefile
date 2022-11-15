@@ -1,37 +1,28 @@
-.dapper:
-	@echo Downloading dapper
-	@curl -sL https://releases.rancher.com/dapper/latest/dapper-`uname -s`-`uname -m` > .dapper.tmp
-	@@chmod +x .dapper.tmp
-	@./.dapper.tmp -v
-	@mv .dapper.tmp .dapper
-
 .default:
 	@echo "Usage:"
-	@echo "    make base-image  -- Shrink the openEuler qcow2 disk to 8G and use it as the base image."
-	@echo "    make aws-image -- Create AMI image from base image by using packer."
-	@echo "    make qemu-image -- Create qemu image from base image by using packer."
-	@echo "    make clean -- Delete temporary files in 'tmp' folder."
+	@echo "    make ami        - Create 'AMI image' from the base AMI image by using packer"
+	@echo "    make qemu       - Create qemu 'acow2 image' by using packer"
+	@echo "    make clean      - Delete temporary files in 'tmp'"
 
+# base-image will generate a base qcow2 image at tmp/SHRINKED-*.qcow2
 base-image:
-	@echo "Building the base image..."
-	./scripts/build-base-image
+	./scripts/build-base-image.sh
 
-aws-image: .dapper
-	@echo "Uploading an image to aws s3..."
-	./scripts/upload-to-s3
-	@echo "Building an aws image"
-	./.dapper
+# base-ami will create a BASE AMI cloud image
+base-ami: base-image
+	./scripts/build-base-ami.sh
 
-qemu-image: base-image
-	@echo "Building a qemu image..."
-	./scripts/openeuler-build-qemu
+# ami: Generate a AWS ami image with name format 'openEuler-<VERSION>-<ARCH>-hvm-<DATETIME>'
+# use SKIP_BASE_AMI=1 to skip build base AMI image.
+ami: base-ami
+	./scripts/openeuler/build-ami.sh
+
+qemu: base-image
+	./scripts/openeuler/build-qemu.sh
 
 clean:
-	rm -r ./tmp || echo "tmp folder already deleted"
-	rm $(shell find . -name "*.dapper*" ! -name "Dockerfile.dapper") || echo "dapper temp file already deleted"
-	rm .dapper || echo ".dapper already deleted"
-	echo "Finished successfully"
+	./scripts/clean.sh
 
 .DEFAULT_GOAL := .default
 
-.PHONY: base-image aws-image qemu-image clean
+.PHONY: base-image base-ami ami qemu clean
