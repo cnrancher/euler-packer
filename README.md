@@ -8,7 +8,7 @@ The generated AMI images can be found in `ap-northeast-1` (Tokyo) and `ca-centra
 You can edit the configuration files in [openeuler/aws/*.json](openeuler/aws/) to customize the region of the generated AMI images.
 
 > AMI name begin with `DEV` is the "Base AMI Image" of openEuler, **this AMI image is not recommended to use in production**.
-> AMI name without `DEV` is configured to install `cloud-init` and other packages, the installation script is [scripts/openeuler-install-cloudinit](scripts/openeuler-install-cloudinit)
+> AMI name without `DEV` is configured to install `cloud-init` and other packages, the installation script is [scripts/openeuler/packer/ami-install-cloud-init.sh](scripts/openeuler/packer/ami-install-cloud-init.sh)
 
 ![](images/generated-ami.png)
 
