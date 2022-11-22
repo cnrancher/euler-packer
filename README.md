@@ -118,6 +118,8 @@ Usage:
 
     The ENA kernel module is installed in to `/opt/ena-driver/ena.ko`, and use `modprobe` to automatically load this kernel module when system start up. **Do not delete this file** or the EC2 instance won't connect to the internet!
 
+- You can find the scripts to install docker at [scripts/others/install-docker.sh](scripts/others/install-docker.sh).
+
 ## License
 
 Licensed under the Apache License, Version 2.0 (the "License");

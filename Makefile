@@ -12,6 +12,10 @@ base-image:
 base-ami: base-image
 	./scripts/build-base-ami.sh
 
+# base-hwcloud will upload the base qcow2 image to hwcloud OBS bucket
+base-hwcloud: base-image
+	./scripts/build-base-hwcloud.sh
+
 # ami: Generate a AWS ami image with name format 'openEuler-<VERSION>-<ARCH>-hvm-<DATETIME>'
 # use SKIP_BASE_AMI=1 to skip build base AMI image.
 ami: base-ami
@@ -19,6 +23,9 @@ ami: base-ami
 
 qemu: base-image
 	./scripts/openeuler/build-qemu.sh
+
+hwcloud:
+	./scripts/openeuler/build-hwcloud.sh
 
 clean:
 	./scripts/clean.sh
