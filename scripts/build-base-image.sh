@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+if [[ "$SKIP_BASE_IMAGE" == "1" ]]; then
+    echo "Skipping build base image"
+    exit 0
+fi
+
 # openEuler arch, can be x86_64 or aarch64
 export OPENEULER_ARCH="${OPENEULER_ARCH:=x86_64}"
 # suseEuler arch, reserved

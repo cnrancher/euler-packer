@@ -14,16 +14,11 @@ if [[ $(uname) == "Darwin" ]]; then
     exit 1
 fi
 
-if [[ "$(command uname -s)" == "Darwin" ]]; then
-    errcho "Shrink qcow2 does not support MacOS!"
-    exit 1
-fi
-
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     echo "Usage: "
     echo "      VERSION=<openEuler_version> ARCH=<arch> $0"
     echo "Example: "
-    echo "      VERSION=<22.03-LTS> ARCH=<x86_64> $0"
+    echo "      VERSION=22.03-LTS ARCH=x86_64 $0"
     exit 0
 fi
 
