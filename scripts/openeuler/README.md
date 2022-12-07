@@ -7,5 +7,5 @@ build-base-image.sh         - Shrink original qcow2 image disk size to 8G
                               (The shrinked qcow2 image won't be deleted)
 build-hwcloud-base-image.sh - Upload base image to Huawei cloud OBS Bucket
 build-hwcloud.sh            - Create huawei cloud image from the base image uploaded to OBS Bucket
-build-qemu.sh               - Use packer to build openEuler qemu image from 'shrinked base qcow2 image'.
+build-harvester.sh          - Use packer to build openEuler harvester image from 'shrinked base qcow2 image'.
 ```
