@@ -1,7 +1,7 @@
 .default:
 	@echo "Usage:"
 	@echo "    make ami        - Create 'AMI image' from the base AMI image by using packer"
-	@echo "    make qemu       - Create qemu 'acow2 image' by using packer"
+	@echo "    make harvester  - Create harvester 'qcow2 image' by using packer"
 	@echo "    make clean      - Delete temporary files in 'tmp'"
 
 # base-image will generate a base qcow2 image at tmp/SHRINKED-*.qcow2
@@ -21,8 +21,8 @@ base-hwcloud: base-image
 ami: base-ami
 	./scripts/openeuler/build-ami.sh
 
-qemu: base-image
-	./scripts/openeuler/build-qemu.sh
+harvester: base-image
+	./scripts/openeuler/build-harvester.sh
 
 hwcloud:
 	./scripts/openeuler/build-hwcloud.sh
@@ -32,4 +32,4 @@ clean:
 
 .DEFAULT_GOAL := .default
 
-.PHONY: base-image base-ami ami qemu clean
+.PHONY: base-image base-ami ami harvester clean

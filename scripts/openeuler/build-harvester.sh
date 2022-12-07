@@ -48,15 +48,15 @@ export OPENEULER_VERSION=${OPENEULER_VERSION}
 export OPENEULER_ARCH=${OPENEULER_ARCH}
 export CURRENT_TIME=$(date +"%Y%m%d-%H%M")
 export WORKING_DIR=${WORKING_DIR}
-cd $WORKING_DIR/openeuler/qemu/
+cd $WORKING_DIR/openeuler/harvester/
 
 if [[ "${OPENEULER_ARCH}" == "x86_64" ]]; then
-    packer init ${FILE:-openeuler-qeum-x86_64.pkr.hcl}
-    packer build ${FILE:-openeuler-qeum-x86_64.pkr.hcl}
+    packer init ${FILE:-openeuler-harvester-x86_64.pkr.hcl}
+    packer build ${FILE:-openeuler-harvester-x86_64.pkr.hcl}
 elif [[ "${OPENEULER_ARCH}" == "aarch64" ]]; then
     # TODO: Add aarch64 support
-    # packer init ${FILE:-openeuler-qeum-arm64.pkr.hcln}
-    # packer build ${FILE:-openeuler-qeum-arm64.pkr.hcln}
+    # packer init ${FILE:-openeuler-harvester-arm64.pkr.hcln}
+    # packer build ${FILE:-openeuler-harvester-arm64.pkr.hcln}
     errcho "aarch64 is not supported yet"
 else
     errcho "Unsupported Arch: ${OPENEULER_ARCH}"

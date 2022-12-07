@@ -22,7 +22,7 @@ This project use `make` command to run scripts, you can run `make` command witho
 ```text
 Usage:
     make ami        - Create 'AMI image' from the base AMI image by using packer
-    make qemu       - Create qemu 'acow2 image' by using packer
+    make harvester  - Create harvester 'acow2 image' by using packer
     make clean      - Delete temporary files in 'tmp'
 ```
 

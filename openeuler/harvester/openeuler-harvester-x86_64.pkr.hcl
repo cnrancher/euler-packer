@@ -14,11 +14,11 @@ variables {
   working_dir = env("WORKING_DIR")
 }
 
-source "qemu" "qemu_base_image" {
+source "qemu" "harvester_base_image" {
   disk_image       = true
   iso_url          = "${var.working_dir}/tmp/SHRINKED-openEuler-${var.version}-${var.arch}.qcow2"
   iso_checksum     = "none"
-  output_directory = "output_openEuler_qemu"
+  output_directory = "${var.working_dir}/harvester_image_output/"
   shutdown_command = "echo 'packer' | sudo -S shutdown -P now"
   disk_size        = "8G"
   format           = "qcow2"
@@ -27,7 +27,7 @@ source "qemu" "qemu_base_image" {
   ssh_username     = "root"
   ssh_password     = "openEuler12#$"
   ssh_timeout      = "2m"
-  vm_name          = "openEuler-${var.version}-${var.arch}.qcow2"
+  vm_name          = "Harvester-openEuler-${var.version}-${var.arch}.qcow2"
   net_device       = "virtio-net"
   disk_interface   = "virtio"
   boot_wait        = "10s"
@@ -41,13 +41,13 @@ source "qemu" "qemu_base_image" {
 }
 
 build {
-  sources = ["source.qemu.qemu_base_image"]
+  sources = ["source.qemu.harvester_base_image"]
 
   provisioner "shell" {
     environment_vars = [
       "VERSION=${var.version}",
       "ARCH=${var.arch}",
     ]
-    script = "../../scripts/openeuler/packer/qemu-install-cloud-init.sh"
+    script = "../../scripts/openeuler/packer/harvester-install-cloud-init.sh"
   }
 }
