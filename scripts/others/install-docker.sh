@@ -9,15 +9,18 @@ set -e
 DOCKER_VERSION="20.10.21"
 CONTAINERD_VERSION="1.6.9"
 CRICTL_VERSION="1.25.0"
+BUILDX_VERSION="0.9.1"
 
 if [[ "$(uname -m)" == "aarch64" ]]; then
     DOCKER_ARCH="aarch64"
     CONTAINERD_ARCH="arm64"
     CRICTL_ARCH="arm64"
+    BUILDX_ARCH="arm64"
 elif [[ "$(uname -m)" == "x86_64" ]]; then
     DOCKER_ARCH="x86_64"
     CONTAINERD_ARCH="amd64"
     CRICTL_ARCH="amd64"
+    BUILDX_ARCH="amd64"
 else
     echo "Unrecognized arch $(uname -m)"
     exit 1
@@ -30,6 +33,9 @@ wget https://github.com/containerd/containerd/releases/download/v${CONTAINERD_VE
 wget https://github.com/kubernetes-sigs/cri-tools/releases/download/v${CRICTL_VERSION}/crictl-v${CRICTL_VERSION}-linux-${CRICTL_ARCH}.tar.gz -O crictl.tar.gz
 # Download docker binaries
 wget https://download.docker.com/linux/static/stable/${DOCKER_ARCH}/docker-${DOCKER_VERSION}.tgz -O docker.tar.gz
+# Download buildx binaries
+sudo wget https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-${BUILDX_ARCH} -O docker-buildx
+sudo chmod +x ./docker-buildx
 # Install containerd
 echo "Extracting containerd binaries..."
 sudo tar Czxvf /usr/local containerd.tar.gz
@@ -39,6 +45,9 @@ sudo tar Czxvf /usr/local/bin crictl.tar.gz
 echo "Extracting docker binaries..."
 tar -zxf ./docker.tar.gz
 sudo cp -p docker/* /usr/bin
+# Install buildx
+sudo mkdir -p /usr/local/lib/docker/cli-plugins
+sudo mv docker-buildx /usr/local/lib/docker/cli-plugins
 
 # https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
 sudo bash -c 'cat > /etc/systemd/system/containerd.service <<EOF
