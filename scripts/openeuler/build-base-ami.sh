@@ -58,12 +58,12 @@ OPENEULER_IMG="openEuler-${VERSION}-${ARCH}"
 cd $WORKING_DIR/tmp
 echo "---- Current dir: $(pwd)"
 
-echo "---- Converting BASE-${OPENEULER_IMG}.qcow2 to RAW image..."
-if [[ ! -e "BASE-${OPENEULER_IMG}.qcow2" ]]; then
-   errcho "File 'BASE-${OPENEULER_IMG}.qcow2' not found in 'tmp/' folder!"
+echo "---- Converting SHRINKED-${OPENEULER_IMG}.qcow2 to RAW image..."
+if [[ ! -e "SHRINKED-${OPENEULER_IMG}.qcow2" ]]; then
+   errcho "File 'SHRINKED-${OPENEULER_IMG}.qcow2' not found in 'tmp/' folder!"
    exit 1
 fi
-qemu-img convert BASE-${OPENEULER_IMG}.qcow2 ${OPENEULER_IMG}.raw
+qemu-img convert SHRINKED-${OPENEULER_IMG}.qcow2 ${OPENEULER_IMG}.raw
 
 echo "---- Uploading RAW image to S3 Bucket..."
 EXISTS=$(aws s3 ls ${BUCKET_NAME}/${OPENEULER_IMG}.raw || echo -n "false")
