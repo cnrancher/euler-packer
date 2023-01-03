@@ -7,18 +7,18 @@ if [[ "$SKIP_BASE_AMI" == "1" ]]; then
 fi
 
 # openEuler arch, can be x86_64 or aarch64
-export OPENEULER_ARCH="${OPENEULER_ARCH:=x86_64}"
+OPENEULER_ARCH="${OPENEULER_ARCH:-x86_64}"
 # suseEuler arch, reserved
-export SUSEEULER_ARCH=""
+SUSEEULER_ARCH="${SUSEEULER_ARCH:-}"
 # openEuler version, e.g. 22.03-LTS
-export OPENEULER_VERSION="${OPENEULER_VERSION:=22.03-LTS}"
+OPENEULER_VERSION="${OPENEULER_VERSION:-22.03-LTS}"
 # suseEuler version, reserved
-export SUSEEULER_VERSION=""
+SUSEEULER_VERSION="${SUSEEULER_VERSION:-}"
 # AWS s3 bucket name
-export AWS_BUCKET_NAME="${AWS_BUCKET_NAME}"
+AWS_BUCKET_NAME="${AWS_BUCKET_NAME:-}"
 # Set working dir
 cd $(dirname $0)/../
-export WORKING_DIR=$(pwd)
+WORKING_DIR=$(pwd)
 
 if [[ -z "${AWS_BUCKET_NAME}" ]]; then
     echo "AWS_BUCKET_NAME environment required!"
@@ -34,5 +34,12 @@ fi
 cd $WORKING_DIR/scripts/
 
 # Upload RAW image to AWS s3 bucket and create snapshot from it
-VERSION="${OPENEULER_VERSION}" ARCH="${OPENEULER_ARCH}" BUCKET_NAME="${AWS_BUCKET_NAME}" ./openeuler/build-base-ami.sh
-# VERSION="${SUSEEULER_VERSION}" ARCH="${SUSEEULER_ARCH}" BUCKET_NAME="${AWS_BUCKET_NAME}" ./suseeuler/build-base-ami.sh
+VERSION="${OPENEULER_VERSION}" \
+    ARCH="${OPENEULER_ARCH}" \
+    BUCKET_NAME="${AWS_BUCKET_NAME}" \
+    ./openeuler/build-base-ami.sh
+
+# VERSION="${SUSEEULER_VERSION}" \
+#     ARCH="${SUSEEULER_ARCH}" \
+#     BUCKET_NAME="${AWS_BUCKET_NAME}" \
+#     ./suseeuler/build-base-ami.sh
