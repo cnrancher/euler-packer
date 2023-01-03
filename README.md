@@ -86,6 +86,7 @@ Usage:
 
       - `OPENEULER_VERSION`: openEuler version, default is `22.03-LTS`
       - `OPENEULER_ARCH`: openEuler arch, default is `x86_64`, can be `x86_64` or `aarch64`.
+      - `OPENEULER_MIRROR`: repo URL of openEuler, default is `https://repo.openeuler.org`.
       - `AWS_BUCKET_NAME`: AWS S3 Bucket name, **required**
       <!-- - `AWS_BASE_AMI`: base AMI ID, required if not executed `make base-ami`
         This script can load base AMI ID from the output of command `make base-ami`, **so this parameter is not force required if you run `make base-ami` before `make ami`**. -->

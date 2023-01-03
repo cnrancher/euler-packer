@@ -43,8 +43,10 @@ else
     echo "---- ARCH: ${ARCH}"
 fi
 
+MIRROR=${MIRROR:-"https://repo.openeuler.org"}
+
 OPENEULER_IMG="openEuler-${VERSION}-${ARCH}"
-OPENEULER_DOWNLOAD_LINK="https://repo.openeuler.org/openEuler-${VERSION}/virtual_machine_img/${ARCH}/${OPENEULER_IMG}.qcow2.xz"
+OPENEULER_DOWNLOAD_LINK="${MIRROR%/}/openEuler-${VERSION}/virtual_machine_img/${ARCH}/${OPENEULER_IMG}.qcow2.xz"
 
 # Download qcow2 image to tmp folder
 mkdir -p $WORKING_DIR/tmp && cd $WORKING_DIR/tmp
