@@ -78,8 +78,8 @@
     ```sh
     #/usr/bin/env bash
 
-    OPENEULER_ARCH=<arch> \
-        OPENEULER_VERSION=<version> \
+    OPENEULER_VERSION=<version> \
+        OPENEULER_ARCH=aarch64 \
         OBS_BUCKET_NAME=<obs_bucket_name> \
         make base-hwcloud
     ```
@@ -104,8 +104,15 @@
     执行 `make hwcloud`，使用 Packer 构建华为云镜像。
 
     ```sh
-    make hwcloud
+    #!/usr/bin/env bash
+    OPENEULER_VERSION=<version> \
+        OPENEULER_ARCH=aarch64 \
+        make hwcloud
     ```
+
+    执行 `make hwcloud` 所涉及到的环境变量：
+    - `OPENEULER_VERSION`: openEuler 版本号，默认为 `22.03-LTS`
+    - `OPENEULER_ARCH`: 系统架构，默认为 `aarch64`，目前仅支持 `aarch64` 架构
 
 ----
 
