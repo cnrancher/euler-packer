@@ -25,7 +25,6 @@ fi
 # Ensure qemu-utils installed
 type qemu-img
 type qemu-nbd
-echo "---- qemu-utils installed"
 # Ensure partprobe exists
 type partprobe
 
@@ -88,8 +87,8 @@ echo "fdisk:"
 sudo fdisk -l "${DEV_NUM}"
 echo "lsblk:"
 lsblk -f
-# echo "---- Running e2fsck..."
-# e2fsck -fy ${DEV_NUM}p2
+echo "---- Running e2fsck..."
+sudo e2fsck -fy ${DEV_NUM}p2 || echo "" # Ignore error
 echo "---- Resizing ext4 file system size..."
 sudo resize2fs ${DEV_NUM}p2 6G
 sudo sync
