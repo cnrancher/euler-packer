@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Install docker binaries: https://docs.docker.com/engine/install/binaries/
 # Install containerd binaries: https://github.com/containerd/containerd/blob/main/docs/getting-started.md#option-1-from-the-official-binaries
 
@@ -12,91 +12,46 @@ CRICTL_VERSION="1.25.0"
 BUILDX_VERSION="0.9.1"
 
 if [[ "$(uname -m)" == "aarch64" ]]; then
-    DOCKER_ARCH="aarch64"
-    CONTAINERD_ARCH="arm64"
-    CRICTL_ARCH="arm64"
-    BUILDX_ARCH="arm64"
+	DOCKER_ARCH="aarch64"
+	CONTAINERD_ARCH="arm64"
+	CRICTL_ARCH="arm64"
+	BUILDX_ARCH="arm64"
 elif [[ "$(uname -m)" == "x86_64" ]]; then
-    DOCKER_ARCH="x86_64"
-    CONTAINERD_ARCH="amd64"
-    CRICTL_ARCH="amd64"
-    BUILDX_ARCH="amd64"
+	DOCKER_ARCH="x86_64"
+	CONTAINERD_ARCH="amd64"
+	CRICTL_ARCH="amd64"
+	BUILDX_ARCH="amd64"
 else
-    echo "Unrecognized arch $(uname -m)"
-    exit 1
+	echo "Unrecognized arch $(uname -m)"
+	exit 1
 fi
 
-echo "Install docker ${DOCKER_VERSION} and containerd ${CONTAINERD_VERSION} for openEuler..."
-# Download containerd binaries
-wget https://github.com/containerd/containerd/releases/download/v${CONTAINERD_VERSION}/containerd-${CONTAINERD_VERSION}-linux-${CONTAINERD_ARCH}.tar.gz -O containerd.tar.gz
-# Download crictl binaries
-wget https://github.com/kubernetes-sigs/cri-tools/releases/download/v${CRICTL_VERSION}/crictl-v${CRICTL_VERSION}-linux-${CRICTL_ARCH}.tar.gz -O crictl.tar.gz
-# Download docker binaries
-wget https://download.docker.com/linux/static/stable/${DOCKER_ARCH}/docker-${DOCKER_VERSION}.tgz -O docker.tar.gz
-# Download buildx binaries
-sudo wget https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-${BUILDX_ARCH} -O docker-buildx
-sudo chmod +x ./docker-buildx
-# Install containerd
-echo "Extracting containerd binaries..."
-sudo tar Czxvf /usr/local containerd.tar.gz
-# Install crictl binary
-sudo tar Czxvf /usr/local/bin crictl.tar.gz
-# Install docker
-echo "Extracting docker binaries..."
-tar -zxf ./docker.tar.gz
-sudo cp -p docker/* /usr/bin
-# Install buildx
-sudo mkdir -p /usr/local/lib/docker/cli-plugins
-sudo mv docker-buildx /usr/local/lib/docker/cli-plugins
+function usage() {
+	cat <<-EOF
+usage: ${0##*/} [options]
 
-# https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
-sudo bash -c 'cat > /etc/systemd/system/containerd.service <<EOF
-# Copyright The containerd Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+    Options:
+    --crictl    --  Install containerd with crictl dependency.
+    --buildx    --  Install docker with docker-buildx dependency.
+    -h | --help --  Print this help message
 
-[Unit]
-Description=containerd container runtime
-Documentation=https://containerd.io
-After=network.target local-fs.target
+    This script will only install docker and containerd by default.
 
-[Service]
-#uncomment to enable the experimental sbservice (sandboxed) version of containerd/cri integration
-#Environment="ENABLE_CRI_SANDBOXES=sandboxed"
-ExecStartPre=-/sbin/modprobe overlay
-ExecStart=/usr/local/bin/containerd
+	EOF
+}
 
-Type=notify
-Delegate=yes
-KillMode=process
-Restart=always
-RestartSec=5
-# Having non-zero Limit*s causes performance problems due to accounting overhead
-# in the kernel. We recommend using cgroups to do container-local accounting.
-LimitNPROC=infinity
-LimitCORE=infinity
-LimitNOFILE=infinity
-# Comment TasksMax if your systemd version does not supports it.
-# Only systemd 226 and above support this version.
-TasksMax=infinity
-OOMScoreAdjust=-999
+function install_docker() {
+	# Download docker binaries
+	if [[ ! -e "docker.tar.gz" ]]; then
+		wget https://download.docker.com/linux/static/stable/${DOCKER_ARCH}/docker-${DOCKER_VERSION}.tgz -O docker.tar.gz
+	fi
+	# Install docker
+	echo "Extracting docker binaries..."
+	tar -zxf ./docker.tar.gz
+	sudo cp -p docker/* /usr/bin
 
-[Install]
-WantedBy=multi-user.target
-EOF'
-
-# https://github.com/moby/moby/tree/master/contrib/init/systemd
-sudo bash -c 'cat >/etc/systemd/system/docker.service <<EOF
+	# https://github.com/moby/moby/tree/master/contrib/init/systemd
+	sudo bash -c 'cat >/etc/systemd/system/docker.service <<EOF
 [Unit]
 Description=Docker Application Container Engine
 Documentation=https://docs.docker.com
@@ -146,7 +101,7 @@ OOMScoreAdjust=-500
 WantedBy=multi-user.target
 EOF'
 
-sudo bash -c 'cat >/etc/systemd/system/docker.socket <<EOF
+	sudo bash -c 'cat >/etc/systemd/system/docker.socket <<EOF
 [Unit]
 Description=Docker Socket for the API
 
@@ -161,9 +116,119 @@ SocketGroup=docker
 [Install]
 WantedBy=sockets.target
 EOF'
+}
+
+function install_containerd() {
+	# Download containerd binaries
+	if [[ ! -e "containerd.tar.gz" ]]; then
+		wget https://github.com/containerd/containerd/releases/download/v${CONTAINERD_VERSION}/containerd-${CONTAINERD_VERSION}-linux-${CONTAINERD_ARCH}.tar.gz -O containerd.tar.gz
+	fi
+
+	# Install containerd
+	echo "Extracting containerd binaries..."
+	sudo tar Czxvf /usr/local containerd.tar.gz
+
+	# https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
+	sudo bash -c 'cat > /etc/systemd/system/containerd.service <<EOF
+# Copyright The containerd Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+[Unit]
+Description=containerd container runtime
+Documentation=https://containerd.io
+After=network.target local-fs.target
+
+[Service]
+#uncomment to enable the experimental sbservice (sandboxed) version of containerd/cri integration
+#Environment="ENABLE_CRI_SANDBOXES=sandboxed"
+ExecStartPre=-/sbin/modprobe overlay
+ExecStart=/usr/local/bin/containerd
+
+Type=notify
+Delegate=yes
+KillMode=process
+Restart=always
+RestartSec=5
+# Having non-zero Limit*s causes performance problems due to accounting overhead
+# in the kernel. We recommend using cgroups to do container-local accounting.
+LimitNPROC=infinity
+LimitCORE=infinity
+LimitNOFILE=infinity
+# Comment TasksMax if your systemd version does not supports it.
+# Only systemd 226 and above support this version.
+TasksMax=infinity
+OOMScoreAdjust=-999
+
+[Install]
+WantedBy=multi-user.target
+EOF'
+}
+
+function install_buildx() {
+	# Download buildx binaries
+	if [[ ! -e "docker-buildx" ]]; then
+		sudo wget https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-${BUILDX_ARCH} -O docker-buildx
+	fi
+	sudo chmod +x ./docker-buildx
+
+	# Install buildx
+	sudo mkdir -p /usr/local/lib/docker/cli-plugins
+	sudo mv docker-buildx /usr/local/lib/docker/cli-plugins
+}
+
+function install_crictl() {
+	# Download crictl binaries
+	if [[ ! -e "crictl.tar.gz" ]]; then
+		wget https://github.com/kubernetes-sigs/cri-tools/releases/download/v${CRICTL_VERSION}/crictl-v${CRICTL_VERSION}-linux-${CRICTL_ARCH}.tar.gz -O crictl.tar.gz
+	fi
+
+	# Install crictl binary
+	sudo tar Czxvf /usr/local/bin crictl.tar.gz
+}
+
+INSTALL_CRICTL=""
+INSTALL_BUILDX=""
+while true; do
+	case "$1" in
+	--crictl )
+		echo "Install containerd with crictl ${CRICTL_VERSION} dependency."
+		INSTALL_CRICTL="true"; shift ;;
+	--buildx | --docker-buildx )
+		echo "Install docker with docker-buildx ${BUILDX_VERSION} dependency."
+		INSTALL_BUILDX="true"; shift ;;
+	-h | --help )
+		usage; exit 0 ;;
+	-* )
+		echo "Unrecognized option: $1"
+		usage; exit 0 ;;
+	* )
+		break ;;
+	esac
+done
+
+echo "Install docker ${DOCKER_VERSION} and containerd ${CONTAINERD_VERSION} for openEuler..."
+install_docker
+install_containerd
+if [[ ! -z "${INSTALL_BUILDX}" ]]; then
+	install_buildx
+fi
+if [[ ! -z "${INSTALL_CRICTL}" ]]; then
+	install_crictl
+fi
 
 # Add docker user group
-sudo groupadd docker
+sudo groupadd docker || echo -n ""
 sudo usermod -aG docker $USER
 
 echo "Enabling and start docker services..."
