@@ -6,10 +6,10 @@ set -e
 
 # Docker release note: https://docs.docker.com/engine/release-notes/#201021
 # Get stable version of Docker: https://download.docker.com/linux/static/stable
-DOCKER_VERSION="20.10.21"
-CONTAINERD_VERSION="1.6.9"
+DOCKER_VERSION="20.10.23"
+CONTAINERD_VERSION="1.6.15"
 CRICTL_VERSION="1.25.0"
-BUILDX_VERSION="0.9.1"
+BUILDX_VERSION="0.10.0"
 
 if [[ "$(uname -m)" == "aarch64" ]]; then
 	DOCKER_ARCH="aarch64"
