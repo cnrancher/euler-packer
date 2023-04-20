@@ -229,7 +229,8 @@ fi
 
 # Add docker user group
 sudo groupadd docker || echo -n ""
-sudo usermod -aG docker openeuler
+sudo usermod -aG docker openeuler || echo -n ""
+sudo usermod -aG docker $USER || echo -n ""
 
 echo "Enabling and start docker services..."
 sudo systemctl daemon-reload
