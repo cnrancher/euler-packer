@@ -102,8 +102,8 @@ if [[ "${ARCH}" == "aarch64" && "${VERSION}" == "22.03-LTS" ]]; then
     sudo mount ${DEV_NUM}p2 mnt
     sudo mount ${DEV_NUM}p1 mnt/boot
 
-    # Download pre-compiled ENA kernel module from AWS S3 bucket
-    wget "https://starry-ena-driver-openeuler.s3.ap-northeast-1.amazonaws.com/${VERSION}/ena.ko" || echo "----- Download failed"
+    # Download pre-compiled ENA kernel module from GitHub Release.
+    wget "https://github.com/STARRY-S/amzn-drivers/releases/download/${VERSION}/ena.ko" || echo "----- Download failed"
     if [[ -e "ena.ko" ]]; then
         # Move kernel module to root home dir
         sudo mkdir -p mnt/opt/ena-driver/
@@ -116,7 +116,7 @@ if [[ "${ARCH}" == "aarch64" && "${VERSION}" == "22.03-LTS" ]]; then
         sudo umount -R mnt
         echo "----- Install finished"
     else
-        echo "----- Failed to download ena.ko from S3 bucket"
+        echo "----- Failed to download ena.ko"
     fi
 fi
 

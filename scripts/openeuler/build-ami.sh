@@ -62,7 +62,7 @@ export OPENEULER_ARCH=${OPENEULER_ARCH}
 export OPENEULER_VERSION=${OPENEULER_VERSION}
 export AWS_BASE_AMI=${AWS_BASE_AMI}
 export AWS_BASE_AMI_OWNER_ID=${AWS_BASE_AMI_OWNER_ID}
-export CURRENT_TIME=$(date +"%Y%m%d-%H%M")
+export CURRENT_TIME=$(date +"%Y%m%d")
 export WORKING_DIR=${WORKING_DIR}
 cd $WORKING_DIR/openeuler/aws
 if [[ "${OPENEULER_ARCH}" == "x86_64" ]]; then

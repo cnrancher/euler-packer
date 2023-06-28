@@ -146,9 +146,8 @@ cat << EOF > role-policy.json
    ]
 }
 EOF
-echo "---- Created."
 
-aws iam put-role-policy --role-name vmimport --policy-name vmimport --policy-document file://role-policy.json
+aws iam put-role-policy --role-name vmimport --policy-name vmimport --policy-document file://role-policy.json || echo -n ""
 
 echo "---- Importing image..."
 aws ec2 import-snapshot \
@@ -188,7 +187,7 @@ else
    exit 1
 fi
 
-CURRENT_TIME=$(date +"%Y%m%d-%H%M")
+CURRENT_TIME=$(date +"%Y%m%d")
 aws ec2 register-image \
     --name "DEV-${OPENEULER_IMG}-${CURRENT_TIME}-BASE" \
     --description "DEV openEuler image, do not use for production!" \

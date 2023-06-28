@@ -46,7 +46,7 @@ fi
 
 export OPENEULER_VERSION=${OPENEULER_VERSION}
 export OPENEULER_ARCH=${OPENEULER_ARCH}
-export CURRENT_TIME=$(date +"%Y%m%d-%H%M")
+export CURRENT_TIME=$(date +"%Y%m%d")
 export WORKING_DIR=${WORKING_DIR}
 cd $WORKING_DIR/openeuler/harvester/
 

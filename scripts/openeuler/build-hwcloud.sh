@@ -49,7 +49,7 @@ export HWCLOUD_FLOATING_IP_ID="${HWCLOUD_FLOATING_IP_ID:=""}"
 # source image ID (源镜像 ID)
 export SOURCE_IMAGE_ID="${SOURCE_IMAGE_ID:="81821d0b-55ea-411b-ac12-6c6818a1a41b"}"
 
-export CURRENT_TIME=$(date +"%Y%m%d-%H%M")
+export CURRENT_TIME=$(date +"%Y%m%d")
 export WORKING_DIR=${WORKING_DIR}
 cd $WORKING_DIR/openeuler/hwcloud
 if [[ "${OPENEULER_ARCH}" == "aarch64" ]]; then
