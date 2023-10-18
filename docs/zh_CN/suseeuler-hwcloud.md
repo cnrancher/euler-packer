@@ -1,32 +1,16 @@
-# openEuler Huawei Cloud
+# SUSE Euler Linux Huawei Cloud
 
-使用 `euler-packer` 项目的脚本为 [华为云](https://www.huaweicloud.com/intl/zh-cn/) 构建 openEuler 镜像。
+使用 `euler-packer` 项目的脚本为 [华为云](https://www.huaweicloud.com/intl/zh-cn/) 构建 SUSE Euler Linux 镜像。
 
-![](/docs/images/openeuler/generated-hwcloud-image.png)
+![](/docs/images/suseeuler/generated-hwcloud-image.png)
 
 本仓库的脚本会在 **华东-上海一** 区生成供鲲鹏 CPU 使用的 ARM64 架构的镜像。
 
-可通过修改 [openeuler/hwcloud/](/openeuler/hwcloud/) 目录下的 Packer 配置文件指定镜像的生成区域。
+可通过修改 [suseeuler/hwcloud/](/suseeuler/hwcloud/) 目录下的 Packer 配置文件指定镜像的生成区域。
 
 ## 构建流程
 
-`euler-packer` 脚本构建 openEuler 华为云镜像的流程如下：
-
-1. 构建本地基础镜像 (base-image)
-
-    1. 下载 openEuler qcow2 格式的虚拟机镜像至本地。
-    1. 使用 `qemu-nbd` 将 qcow2 格式的虚拟机镜像分区加载至系统，将总大小为 40G 的磁盘分区调整为 8G。
-
-1. 构建基础云镜像 (base-hwcloud)
-
-    1. 使用 `obsutil` 将缩容后的镜像上传至华为云 OBS 存储桶。
-    1. 使用 *IMS 镜像服务* 将存储桶中存储的 qcow2 镜像制作基础云镜像。
-
-1. 使用 Packer 构建云镜像
-
-    1. 使用 Packer 启动 “基础云镜像” 虚拟机实例。
-    1. 在虚拟机中安装 `cloud-init` 等基础软件包，调整内核参数，删除 root 密码等。
-    1. 最终将此虚拟机的磁盘制作最终可供使用的云镜像 (`openEuler-<VERSION>-<ARCH>-hvm-<DATETIME>`)。
+构建流程与 [openEuler 华为云镜像构建流程](./openeuler-hwcloud.md#构建流程) 一致。
 
 ## 准备工作
 
@@ -41,7 +25,7 @@
     安装运行脚本所需的依赖：`docker`, `awscli`, `jq`, `qemu-utils`, `partprobe` (`parted`), `packer`, `fdisk`, `obsutil`
 
     ```sh
-    # Ubuntu
+    # Ubuntu / Debian
     sudo apt install awscli jq qemu-utils parted fdisk util-linux
     ```
 
@@ -76,25 +60,25 @@
 1. 构建 `qcow2` 格式的基础镜像并上传至华为云 OBS 存储桶。
 
     ```bash
-    ./openeuler.sh \
+    ./suseeuler.sh \
         --hwcloud-base \
-        --version 22.03-LTS \
+        --version 2.1 \
         --arch aarch64 \
         --obs-bucket <BUCKET_NAME>
     ```
 
     执行脚本的参数：
-    - `--version`: openEuler 版本号（**必须**）
+    - `--version`: SUSE Euler 版本号（**必须**）
     - `--arch`: 系统架构，默认为 `aarch64`，目前仅支持 `aarch64` 架构
     - `--obs-bucket`: 华为云 OBS 存储桶名称
 
 1. 手动在华为云 *IMS 镜像服务* 页面创建基础云镜像。
 
-    ![](../images/openeuler/build-base-hwcloud.png)
+    ![](../images/suseeuler/build-base-hwcloud.png)
 
-    为了保持统一，将基础云镜像的名称格式设定为：`DEV-openEuler-<VERSION>-<ARCH>-<DATETIME>-BASE`
+    为了保持统一，将基础云镜像的名称格式设定为：`DEV-SEL-<VERSION>-<ARCH>-<DATETIME>-BASE`
 
-    ![](../images/openeuler/build-base-hwcloud-2.png)
+    ![](../images/suseeuler/build-base-hwcloud-2.png)
 
 1. 参照 [华为云文档 - 使用Packer创建私有镜像](https://support.huaweicloud.com/bestpractice-ims/ims_bp_0031.html#section3) 设定下方所需的环境变量，执行脚本，使用 Packer 构建华为云镜像。
 
@@ -121,16 +105,12 @@
     # source image ID (源镜像 ID)
     export SOURCE_IMAGE_ID="<SOURCE_IMAGE_ID>"
 
-    ./openeuler.sh \
+    ./suseeuler.sh \
         --hwcloud \
-        --version 22.03-LTS \
+        --version 2.1 \
         --arch aarch64
     ```
 
 ----
 
-最终构建的 AMI 镜像可于 *IMS 镜像服务* 页面获取到，命名格式为：`openEuler-<VERSION>-<ARCH>-<DATETIME>`
-
-## 其他
-
-openEuler 一键安装高版本 Docker 脚本 [scripts/others/install-docker.sh](/scripts/others/install-docker.sh)。
+最终构建的 AMI 镜像可于 *IMS 镜像服务* 页面获取到，命名格式为：`SUSE-Euler-Linux-<VERSION>-<ARCH>-<DATETIME>`

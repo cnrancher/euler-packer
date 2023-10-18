@@ -26,8 +26,8 @@ echo ""
 
 ################### PLEASE EDIT THESE VARIABLES MANUALLY BEFORE RUN THIS SCRIPT! ################
 ###################                  KEEP YOUR PASSWORD SAFE                     ################
-export OPENEULER_ARCH="${OPENEULER_ARCH:="aarch64"}"
-export OPENEULER_VERSION="${OPENEULER_VERSION:="22.03-LTS"}"
+export SUSEEULER_ARCH="${SUSEEULER_ARCH:="aarch64"}"
+export SUSEEULER_VERSION="${SUSEEULER_VERSION:="2.1"}"
 
 # Environment variable definitions required by hwcloud
 # See <https://support.huaweicloud.com/bestpractice-ims/ims_bp_0031.html#section3>
@@ -51,11 +51,11 @@ export SOURCE_IMAGE_ID="${SOURCE_IMAGE_ID:="81821d0b-55ea-411b-ac12-6c6818a1a41b
 
 export CURRENT_TIME=$(date +"%Y%m%d")
 export WORKING_DIR=${WORKING_DIR}
-cd $WORKING_DIR/openeuler/hwcloud
-if [[ "${OPENEULER_ARCH}" == "aarch64" ]]; then
-    packer build ${FILE:-openeuler-huawei-kunpeng-arm64.json}
+cd $WORKING_DIR/suseeuler/hwcloud
+if [[ "${SUSEEULER_ARCH}" == "aarch64" ]]; then
+    packer build ${FILE:-suseeuler-huawei-kunpeng-arm64.json}
 else
-    errcho "Unsupported Arch: ${OPENEULER_ARCH}"
+    errcho "Unsupported Arch: ${SUSEEULER_ARCH}"
     errcho "Only aarch64 are supported."
     exit 1
 fi

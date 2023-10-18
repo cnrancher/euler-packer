@@ -19,7 +19,7 @@
             "source_ami_filter": {
                 "owners": ["{{user `owner_id`}}"]
             },
-            "instance_type": "t4g.micro",
+            "instance_type": "t4g.medium",
             "ssh_username": "root",
             "ssh_password": "openEuler12#$",
             "ami_name": "openEuler-{{user `version`}}-arm64-hvm-{{user `current_time`}}",

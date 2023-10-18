@@ -22,11 +22,11 @@ if [[ -z "${AWS_ACCESS_KEY_ID}" || -z "${AWS_SECRET_ACCESS_KEY}" ]]; then
     exit 1
 fi
 
-if [ -z "${OPENEULER_VERSION}" ]; then
-    OPENEULER_VERSION="22.03-LTS"
-    echo "OPENEULER_VERSION not found, set to default: 22.03-LTS"
+if [ -z "${SUSEEULER_VERSION}" ]; then
+    errcho "SUSEEULER_VERSION not set"
+    exit 1
 else
-    echo "OPENEULER_VERSION: ${OPENEULER_VERSION}"
+    echo "SUSEEULER_VERSION: ${SUSEEULER_VERSION}"
 fi
 
 if [ -z "${AWS_BASE_AMI}" ]; then
@@ -51,26 +51,26 @@ if [ -z "${AWS_BASE_AMI_OWNER_ID}" ]; then
     exit 1
 fi
 
-if [ -z "${OPENEULER_ARCH}" ]; then
-    echo "OPENEULER_ARCH not specified, set to x86_64"
-    OPENEULER_ARCH="x86_64"
+if [ -z "${SUSEEULER_ARCH}" ]; then
+    echo "SUSEEULER_ARCH not specified, set to x86_64"
+    SUSEEULER_ARCH="x86_64"
 else
-    echo "OPENEULER_ARCH: ${OPENEULER_ARCH}"
+    echo "SUSEEULER_ARCH: ${SUSEEULER_ARCH}"
 fi
 
-export OPENEULER_ARCH=${OPENEULER_ARCH}
-export OPENEULER_VERSION=${OPENEULER_VERSION}
+export SUSEEULER_ARCH=${SUSEEULER_ARCH}
+export SUSEEULER_VERSION=${SUSEEULER_VERSION}
 export AWS_BASE_AMI=${AWS_BASE_AMI}
 export AWS_BASE_AMI_OWNER_ID=${AWS_BASE_AMI_OWNER_ID}
 export CURRENT_TIME=$(date +"%Y%m%d")
 export WORKING_DIR=${WORKING_DIR}
-cd $WORKING_DIR/openeuler/aws
-if [[ "${OPENEULER_ARCH}" == "x86_64" ]]; then
-    packer build ${FILE:-openeuler-aws-amis-x86_64.json}
-elif [[ "${OPENEULER_ARCH}" == "aarch64" ]]; then
-    packer build ${FILE:-openeuler-aws-amis-arm64.json}
+cd $WORKING_DIR/suseeuler/aws
+if [[ "${SUSEEULER_ARCH}" == "x86_64" ]]; then
+    packer build ${FILE:-suseeuler-aws-amis-x86_64.json}
+elif [[ "${SUSEEULER_ARCH}" == "aarch64" ]]; then
+    packer build ${FILE:-suseeuler-aws-amis-arm64.json}
 else
-    errcho "Unsupported Arch: ${OPENEULER_ARCH}"
+    errcho "Unsupported Arch: ${SUSEEULER_ARCH}"
     errcho "Only x86_64 and aarch64 are supported."
     exit 1
 fi

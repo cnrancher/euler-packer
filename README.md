@@ -1,24 +1,22 @@
-# Packer build scripts for euler system
+# Packer build scripts for euler systems
 
-These scripts are currently used to create [openEuler](https://www.openeuler.org/) cloud image for [AWS](https://aws.amazon.com/) and [Huawei Cloud](https://www.huaweicloud.com/).
+These scripts are currently used to create [openEuler](https://www.openeuler.org/) and SUSE Euler Linux cloud image for [AWS](https://aws.amazon.com/) and [Huawei Cloud](https://www.huaweicloud.com/).
 
-![](/docs/images/generated-ami.png)
+![](/docs/images/openeuler/generated-ami.png)
 
-![](/docs/images/generated-hwcloud-image.png)
+![](/docs/images/openeuler/generated-hwcloud-image.png)
 
 ## Documents
 
-> Simplified Chinese | [简体中文](/docs/zh_CN/README.md)
+> Simplified Chinese | [简体中文](docs/zh_CN/)
 
-For more info about this project, please refer documents in [docs](/docs/) folder.
+Documents are available in [docs](docs/) folder.
 
 ## Docker Installation
 
 Script to install Docker for openEuler: [scripts/others/install-docker.sh](/scripts/others/install-docker.sh)
 
 ## License
-
-Copyright 2023 SUSE Rancher
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
