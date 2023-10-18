@@ -4,7 +4,7 @@
 
 默认会在 AWS `ap-northeast-1` (Tokyo) 和 `ca-central-1` (Canada) 区域生成 AMI 镜像，可通过修改 [openeuler/aws/](/openeuler/aws/) 目录下的 Packer 配置文件指定 AMI 的生成区域。
 
-![](../images/generated-ami.png)
+![](../images/openeuler/generated-ami.png)
 
 ## 构建流程
 
@@ -20,7 +20,8 @@
     1. 将调整过分区大小的 qcow2 镜像转换为 RAW 格式，上传至 AWS S3 存储桶。
     1. 将存储桶中的 RAW 镜像创建 Snapshot，之后使用此 Snapshot 创建基础 AMI 镜像 (`DEV-*-BASE`)。
 
-    > 基础 AMI 镜像不包含 `cloud-init` 机制，且未禁用 root 密码登录，基础 AMI 镜像仅用来构建最终的 AMI 镜像或调试使用。
+    > 基础 AMI 镜像不包含 `cloud-init` 机制，且未禁用 root 密码登录，基础 AMI 镜像仅用来构建最终的 AMI 镜像或调试使用。<br>
+    > 在完成镜像构建后，可删除 DEV 基础 AMI 镜像和 Snapshot，减少不必要的费用开销。
 
 1. 使用 Packer 构建 AMI 镜像
 
@@ -34,15 +35,15 @@
 
     在构建镜像的过程中，需要使用 `qemu-nbd` 将 qcow2 格式的镜像的分区表加载至系统中，之后对根分区进行缩容和分区表调整，因此 `euler-packer` 的脚本仅支持在 Linux 系统上运行。
 
-    > 本仓库的脚本目前进行开发和调试的系统为 Ubuntu 20.04
+    > 本仓库脚本使用系统 Debian 12
 
 1. 安装依赖
 
-    安装运行脚本所需的依赖：`make`, `docker`, `awscli`, `jq`, `qemu-utils`, `partprobe` (`parted`), `packer`, `fdisk`
+    安装运行脚本所需的依赖：`docker`, `awscli`, `jq`, `qemu-utils`, `partprobe` (`parted`), `packer`, `fdisk`
 
     ```sh
-    # Ubuntu
-    sudo apt install make awscli jq qemu-utils parted fdisk
+    # Ubuntu / Debian
+    sudo apt install awscli jq qemu-utils parted fdisk util-linux
     ```
 
     本仓库的脚本所使用的 Packer 版本需要大于等于 1.7，请按照 [官方教程](https://developer.hashicorp.com/packer/tutorials/docker-get-started/get-started-install-cli#installing-packer) 安装 Packer。
@@ -52,7 +53,7 @@
     - 执行 `aws configure`，填写 Access Key ID，Secret Key 并将区域设定为 `ap-northeast-1`。
     - 设定环境变量 `AWS_ACCESS_KEY_ID`，`AWS_SECRET_ACCESS_KEY`。
 
-     ```sh
+    ```sh
     # Generate ~/.aws/credential
     aws configure
     # Set environment variables
@@ -76,23 +77,22 @@
 
 ## 构建 AMI 镜像
 
-``` sh
-#!/usr/bin/env bash
-
-OPENEULER_VERSION=<version> \
-    OPENEULER_ARCH=<arch> \
-    AWS_BUCKET_NAME=<bucket_name> \
-    AWS_BASE_AMI_OWNER_ID=<ower_id> \
-    make ami
+```bash
+./openeuler.sh \
+    --aws \
+    --aws-bucket <BUCKET_NAME>
+    --aws-owner-id <OWNER_ID> \
+    --version "22.03-LTS" \
+    --arch "x86_64" \
 ```
 
-执行 `make ami` 时涉及到的环境变量：
+执行脚本的参数：
 
-- `AWS_BUCKET_NAME`: AWS S3 存储桶名称（**必须**）
-- `AWS_BASE_AMI_OWNER_ID`: AWS 帐号的 Owner ID，当前帐号的 Owner ID 可从 AWS 控制台获取（**必须**）
-- `OPENEULER_VERSION`: openEuler 版本号，默认为 `22.03-LTS`
-- `OPENEULER_ARCH`: 系统架构，默认为 `x86_64`，可设定为 `x86_64` 或 `aarch64`
-- `OPENEULER_MIRROR`: 下载 openEuler qcow2 镜像的镜像源链接，默认为 `https://repo.openeuler.org`
+- `--aws-bucket`: AWS S3 存储桶名称（**必须**）
+- `--aws-owner-id`: AWS 帐号的 Owner ID，当前帐号的 Owner ID 可从 AWS 控制台获取（**必须**）
+- `--version`: openEuler 版本号（**必须**）
+- `--arch`: 系统架构，默认为 `x86_64`，可设定为 `x86_64` 或 `aarch64`
+- `--mirror`: 下载 openEuler qcow2 镜像的镜像源链接，默认为 `https://repo.openeuler.org`
 
 ----
 

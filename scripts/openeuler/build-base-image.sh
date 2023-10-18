@@ -10,47 +10,50 @@ cd $(dirname $0)/../../
 export WORKING_DIR=$(pwd)
 
 if [[ $(uname) == "Darwin" ]]; then
-    errcho "MacOS is not supported"
+    errcho "macOS is not supported"
     exit 1
 fi
 
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     echo "Usage: "
-    echo "      VERSION=<openEuler_version> ARCH=<arch> $0"
+    echo "      OPENEULER_VERSION=<openEuler_version> OPENEULER_ARCH=<arch> $0"
     echo "Example: "
-    echo "      VERSION=22.03-LTS ARCH=x86_64 $0"
+    echo "      OPENEULER_VERSION=22.03-LTS OPENEULER_ARCH=x86_64 $0"
     exit 0
 fi
 
-# Ensure qemu-utils installed
-type qemu-img
-type qemu-nbd
-# Ensure partprobe exists
-type partprobe
+# Ensure utils are installed
+type qemu-img > /dev/null
+type qemu-nbd > /dev/null
+type partprobe > /dev/null
+type resizepart > /dev/null
+type fdisk > /dev/null
+type e2fsck > /dev/null
+type resize2fs > /dev/null
 
-if [[ -z "${VERSION}" ]]; then
-    errcho "---- Failed to shrink disk size: environment VERSION required!"
+if [[ -z "${OPENEULER_VERSION}" ]]; then
+    errcho "---- Failed to shrink disk size: environment OPENEULER_VERSION required!"
     exit 1
 else
-    echo "---- VERSION: ${VERSION}"
+    echo "---- OPENEULER_VERSION: ${OPENEULER_VERSION}"
 fi
 
-if [[ -z "${ARCH}" ]]; then
-    echo "---- environment ARCH not specified, set to default: x86_64"
-    ARCH=x86_64
+if [[ -z "${OPENEULER_ARCH}" ]]; then
+    echo "---- environment OPENEULER_ARCH not specified, set to default: x86_64"
+    OPENEULER_ARCH=x86_64
 else
-    echo "---- ARCH: ${ARCH}"
+    echo "---- OPENEULER_ARCH: ${OPENEULER_ARCH}"
 fi
 
-MIRROR=${MIRROR:-"https://repo.openeuler.org"}
+OPENEULER_MIRROR=${OPENEULER_MIRROR:-"https://repo.openeuler.org"}
 
-OPENEULER_IMG="openEuler-${VERSION}-${ARCH}"
-OPENEULER_DOWNLOAD_LINK="${MIRROR%/}/openEuler-${VERSION}/virtual_machine_img/${ARCH}/${OPENEULER_IMG}.qcow2.xz"
+OPENEULER_IMG="openEuler-${OPENEULER_VERSION}-${OPENEULER_ARCH}"
+OPENEULER_DOWNLOAD_LINK="${OPENEULER_MIRROR%/}/openEuler-${OPENEULER_VERSION}/virtual_machine_img/${OPENEULER_ARCH}/${OPENEULER_IMG}.qcow2.xz"
 
 # Download qcow2 image to tmp folder
 mkdir -p $WORKING_DIR/tmp && cd $WORKING_DIR/tmp
 if [[ -e "${OPENEULER_IMG}.raw" ]]; then
-    echo "---- ${OPENEULER_IMG} already exists, delete and re-create it?"
+    echo "---- ${OPENEULER_IMG}.raw already exists, delete and re-create it?"
     read -p "---- [y/N]: " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 0
     rm ${OPENEULER_IMG}.raw
 fi
@@ -77,33 +80,39 @@ DEV_NUM="/dev/nbd0"
 echo "---- modprobe nbd max_part=3..."
 sudo modprobe nbd max_part=3
 echo "---- qemu-nbd..."
-nbd_loaded=$(lsblk | grep nbd0 || echo -n "")
+nbd_loaded=$(lsblk | grep ${DEV_NUM#"/dev/"} || true)
 if [[ ! -z "${nbd_loaded}" ]]; then
     sudo qemu-nbd -d "${DEV_NUM}"
 fi
 sudo qemu-nbd -c "${DEV_NUM}" "${OPENEULER_IMG}.qcow2"
-echo "---- Disk layout..."
+echo "---- Disk layout"
 echo "fdisk:"
 sudo fdisk -l "${DEV_NUM}"
 echo "lsblk:"
 lsblk -f
-echo "---- Running e2fsck..."
-sudo e2fsck -fy ${DEV_NUM}p2 || echo "" # Ignore error
+echo "---- Finding root disk partition"
+PARTITION=$(sudo fdisk -l | grep $DEV_NUM | grep "Linux filesystem" | cut -d ' ' -f 1 || true)
+if [[ -z $PARTITION ]]; then
+    errcho "failed to get partition num"
+    exit 1
+fi
+echo "---- Running e2fsck"
+sudo e2fsck -fy ${PARTITION} || true # Ignore error
 echo "---- Resizing ext4 file system size..."
-sudo resize2fs ${DEV_NUM}p2 6G
+sudo resize2fs ${PARTITION} 5G
 sudo sync
 
 # Install ENA kernel module for openEuler aarch64
-if [[ "${ARCH}" == "aarch64" && "${VERSION}" == "22.03-LTS" ]]; then
+if [[ "${OPENEULER_ARCH}" == "aarch64" && "${OPENEULER_VERSION}" == "22.03-LTS" ]]; then
     echo "----- Installing ENA kernel module for aarch64"
     # Create a mountpoint folder
     mkdir -p mnt
     # Mount root and boot partition to mountpoint
-    sudo mount ${DEV_NUM}p2 mnt
+    sudo mount ${PARTITION} mnt
     sudo mount ${DEV_NUM}p1 mnt/boot
 
     # Download pre-compiled ENA kernel module from GitHub Release.
-    wget "https://github.com/STARRY-S/amzn-drivers/releases/download/${VERSION}/ena.ko" || echo "----- Download failed"
+    wget "https://github.com/STARRY-S/amzn-drivers/releases/download/${OPENEULER_VERSION}/ena.ko" || echo "----- Download failed"
     if [[ -e "ena.ko" ]]; then
         # Move kernel module to root home dir
         sudo mkdir -p mnt/opt/ena-driver/
@@ -127,41 +136,14 @@ echo "---- Reloading partition table..."
 sudo partprobe ${DEV_NUM}
 sleep 1
 echo "---- Resizing partition size..."
-# Reset fdisk error status
-echo -n "0" > $WORKING_DIR/tmp/fdisk_failed_ioctl
-# Refer: https://superuser.com/questions/332252/how-to-create-and-format-a-partition-using-a-bash-script
-sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | sudo fdisk ${DEV_NUM} || echo -n "1" > $WORKING_DIR/tmp/fdisk_failed_ioctl
-  p # print current partition
-  d # delete partition
-  2 # partition number 2
-  n # create new partition
-  p # partition type primary
-  2 # partition number 2
-    # default start position
-  +6G # 6G for root partition
-  w # sync changes to disk
-  p # print partition
-  q # done
-EOF
-
+echo yes | sudo parted ${DEV_NUM} ---pretend-input-tty resizepart ${PARTITION#"${DEV_NUM}p"} 6GB
+sleep 1
+echo "---- Resized partition"
+sudo fdisk -l ${DEV_NUM}
 sudo sync
 sleep 1
 sudo partprobe ${DEV_NUM}
 sleep 1
-
-echo "---- Check fdisk command succeed or not"
-cd $WORKING_DIR/tmp/
-# If fdisk failed with device busy error, check the root partition is resized to 6G or not
-if [[ "$(cat fdisk_failed_ioctl)" == "1" ]]; then
-    echo "---- fdisk executes failed, check root device is shinked to 6G or not"
-    check_root_size=$(lsblk | grep p2 | grep 6G || echo "")
-    if [[ -z ${check_root_size} ]]; then
-        lsblk
-        errcho "---- Failed to shrink root partition size to 6G"
-        exit 1
-    fi
-    echo "---- root partition already shrinked to 6G"
-fi
 
 sudo qemu-nbd -d ${DEV_NUM}
 

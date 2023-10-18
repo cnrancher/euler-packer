@@ -20,9 +20,9 @@ fi
 
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     echo "Usage: "
-    echo "      BUCKET_NAME=<bucket name> OPENEULER_VERSION=<version> OPENEULER_ARCH=<arch> $0"
+    echo "      BUCKET_NAME=<bucket name> SUSEEULER_VERSION=<version> SUSEEULER_ARCH=<arch> $0"
     echo "Example: "
-    echo "      BUCKET_NAME=example-bucket OPENEULER_VERSION=22.03-LTS OPENEULER_ARCH=x86_64 $0"
+    echo "      BUCKET_NAME=example-bucket SUSEEULER_VERSION=2.1 SUSEEULER_ARCH=x86_64 $0"
     exit 0
 fi
 
@@ -39,45 +39,46 @@ else
     errcho "BUCKET_NAME: $BUCKET_NAME"
 fi
 
-if [[ -z "${OPENEULER_VERSION}" ]]; then
-    errcho "environment OPENEULER_VERSION required!"
+if [[ -z "${SUSEEULER_VERSION}" ]]; then
+    errcho "environment SUSEEULER_VERSION required!"
     exit 1
 else
-    echo "OPENEULER_VERSION: ${OPENEULER_VERSION}"
+    echo "SUSEEULER_VERSION: ${SUSEEULER_VERSION}"
 fi
 
-if [[ -z "${OPENEULER_ARCH}" ]]; then
-    errcho "environment OPENEULER_ARCH not specified, set to default: x86_64"
-    OPENEULER_ARCH=x86_64
+if [[ -z "${SUSEEULER_ARCH}" ]]; then
+    errcho "environment SUSEEULER_ARCH not specified, set to default: x86_64"
+    SUSEEULER_ARCH=x86_64
 else
-    echo "OPENEULER_ARCH: ${OPENEULER_ARCH}"
+    echo "SUSEEULER_ARCH: ${SUSEEULER_ARCH}"
 fi
 
-OPENEULER_IMG="openEuler-${OPENEULER_VERSION}-${OPENEULER_ARCH}"
+SUSEEULER_IMG="SEL-${SUSEEULER_VERSION}.${SUSEEULER_ARCH}-1.1.0-normal-Build"
 
 cd $WORKING_DIR/tmp
 echo "---- Current dir: $(pwd)"
 
-echo "---- Converting SHRINKED-${OPENEULER_IMG}.qcow2 to RAW image..."
-if [[ ! -e "SHRINKED-${OPENEULER_IMG}.qcow2" ]]; then
-   errcho "File 'SHRINKED-${OPENEULER_IMG}.qcow2' not found in 'tmp/' folder!"
+echo "---- Converting SHRINKED-${SUSEEULER_IMG}.qcow2 to RAW image..."
+if [[ ! -e "SHRINKED-${SUSEEULER_IMG}.qcow2" ]]; then
+   errcho "File 'SHRINKED-${SUSEEULER_IMG}.qcow2' not found in 'tmp/' folder!"
    exit 1
 fi
-qemu-img convert SHRINKED-${OPENEULER_IMG}.qcow2 ${OPENEULER_IMG}.raw
+rm ${SUSEEULER_IMG}.raw || true
+qemu-img convert SHRINKED-${SUSEEULER_IMG}.qcow2 ${SUSEEULER_IMG}.raw
 
 echo "---- Uploading RAW image to S3 Bucket..."
-EXISTS=$(aws s3 ls ${BUCKET_NAME}/${OPENEULER_IMG}.raw || echo -n "false")
+EXISTS=$(aws s3 ls ${BUCKET_NAME}/${SUSEEULER_IMG}.raw || echo -n "false")
 if [[ "${EXISTS}" == "false" ]]; then
    echo "--- aws s3 cp"
-   aws s3 cp ${OPENEULER_IMG}.raw s3://${BUCKET_NAME}/
+   aws s3 cp ${SUSEEULER_IMG}.raw s3://${BUCKET_NAME}/
 else
-   echo "---- File ${OPENEULER_IMG}.raw already uploaded on S3, delete and re-upload it?"
+   echo "---- File ${SUSEEULER_IMG}.raw already uploaded on S3, delete and re-upload it?"
    read -p "---- [y/N]: " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || DELETE="false"
    if [[ "$DELETE" == "false" ]]; then
       echo "----- Skip re-upload."
    else
-      aws s3 rm s3://${BUCKET_NAME}/${OPENEULER_IMG}.raw
-      aws s3 cp ${OPENEULER_IMG}.raw s3://${BUCKET_NAME}/
+      aws s3 rm s3://${BUCKET_NAME}/${SUSEEULER_IMG}.raw
+      aws s3 cp ${SUSEEULER_IMG}.raw s3://${BUCKET_NAME}/
    fi
 fi
 
@@ -151,9 +152,9 @@ aws iam put-role-policy --role-name vmimport --policy-name vmimport --policy-doc
 
 echo "---- Importing image..."
 aws ec2 import-snapshot \
-   --description "openEuler RAW image import task" \
+   --description "SUSE Euler Linux RAW image import task" \
    --disk-container \
-   "Format=RAW,UserBucket={S3Bucket=${BUCKET_NAME},S3Key=${OPENEULER_IMG}.raw}" > import-output.txt
+   "Format=RAW,UserBucket={S3Bucket=${BUCKET_NAME},S3Key=${SUSEEULER_IMG}.raw}" > import-output.txt
 cat import-output.txt
 echo "---- Import task created."
 
@@ -177,20 +178,20 @@ else
 fi
 
 echo "----- Creating AMI image..."
-if [[ "${OPENEULER_ARCH}" == "x86_64" ]]; then
+if [[ "${SUSEEULER_ARCH}" == "x86_64" ]]; then
    AWS_ARCH="x86_64"
-elif [[ "${OPENEULER_ARCH}" == "aarch64" ]]; then
+elif [[ "${SUSEEULER_ARCH}" == "aarch64" ]]; then
    AWS_ARCH="arm64"
 else
-   errcho "Unsupported Arch: ${OPENEULER_ARCH}"
-   errcho "Valid OPENEULER_ARCH: x86_64 or aarch64"
+   errcho "Unsupported Arch: ${SUSEEULER_ARCH}"
+   errcho "Valid SUSEEULER_ARCH: x86_64 or aarch64"
    exit 1
 fi
 
 CURRENT_TIME=$(date +"%Y%m%d")
 aws ec2 register-image \
-    --name "DEV-${OPENEULER_IMG}-${CURRENT_TIME}-BASE" \
-    --description "DEV openEuler image, do not use for production!" \
+    --name "DEV-${SUSEEULER_IMG}-${CURRENT_TIME}-BASE" \
+    --description "DEV SUSE Euler Linux image, do not use for production!" \
     --root-device-name /dev/xvda \
     --architecture ${AWS_ARCH} \
     --ena-support \
@@ -198,4 +199,7 @@ aws ec2 register-image \
     --block-device-mappings \
       DeviceName=/dev/xvda,Ebs={SnapshotId=${SNAPSHOT_ID}} > register-image.txt
 cat register-image.txt
+
+sleep 30
+
 echo "---- $0 Done."

@@ -13,7 +13,7 @@ function errcho() {
 }
 
 if [[ $(uname) == "Darwin" ]]; then
-    errcho "MacOS is not supported"
+    errcho "macOS is not supported"
     exit 1
 fi
 

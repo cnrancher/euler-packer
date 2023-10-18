@@ -21,29 +21,29 @@ fi
 
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     echo "Usage: "
-    echo "      OPENEULER_VERSION=<openEuler_version> OPENEULER_ARCH=<arch> BUCKET_NAME=<bucket-name> BUCKET_LOCATION=<region> $0"
+    echo "      SUSEEULER_VERSION=<suseEuler_version> SUSEEULER_ARCH=<arch> BUCKET_NAME=<bucket-name> BUCKET_LOCATION=<region> $0"
     echo "Example: "
-    echo "      OPENEULER_VERSION=22.03-LTS OPENEULER_ARCH=x86_64 BUCKET_NAME=openeuler-packer BUCKET_LOCATION=cn-east-3 $0"
+    echo "      SUSEEULER_VERSION=2.1 SUSEEULER_ARCH=x86_64 BUCKET_NAME=suseeuler-packer BUCKET_LOCATION=cn-east-3 $0"
     exit 0
 fi
 
-if [[ -z "${OPENEULER_VERSION}" ]]; then
-    errcho "---- Environment variable OPENEULER_VERSION required!"
+if [[ -z "${SUSEEULER_VERSION}" ]]; then
+    errcho "---- Environment variable SUSEEULER_VERSION required!"
     exit 1
 else
-    echo "---- OPENEULER_VERSION: ${OPENEULER_VERSION}"
+    echo "---- SUSEEULER_VERSION: ${SUSEEULER_VERSION}"
 fi
 
-if [[ -z "${OPENEULER_ARCH}" ]]; then
-    echo "---- Environment variabe OPENEULER_ARCH not specified, set to default: aarch64"
-    OPENEULER_ARCH=aarch64
+if [[ -z "${SUSEEULER_ARCH}" ]]; then
+    echo "---- Environment variabe SUSEEULER_ARCH not specified, set to default: aarch64"
+    SUSEEULER_ARCH=aarch64
 else
-    echo "---- OPENEULER_ARCH: ${OPENEULER_ARCH}"
+    echo "---- SUSEEULER_ARCH: ${SUSEEULER_ARCH}"
 fi
 
 if [[ -z "${BUCKET_NAME}" ]]; then
-    echo "---- BUCKET_NAME environment variable not specified, set to default: openeuler-packer"
-    BUCKET_NAME="openeuler-packer"
+    echo "---- BUCKET_NAME environment variable not specified, set to default: suseeuler-packer"
+    BUCKET_NAME="suseeuler-packer"
 else
     echo "---- Bucket name: ${BUCKET_NAME}"
 fi
@@ -73,14 +73,14 @@ else
 fi
 
 # Upload shrinked 8G qcow2 image to bucket
-OPENEULER_IMG="openEuler-${OPENEULER_VERSION}-${OPENEULER_ARCH}"
-echo "---- Upload SHRINKED-${OPENEULER_IMG}.qcow2 to hwcloud OBS bucket ${BUCKET_NAME} ..."
+SUSEEULER_IMG="SEL-${SUSEEULER_VERSION}.${SUSEEULER_ARCH}-1.1.0-normal-Build"
+echo "---- Upload SHRINKED-${SUSEEULER_IMG}.qcow2 to hwcloud OBS bucket ${BUCKET_NAME} ..."
 cd ${WORKING_DIR}/tmp
-if [[ ! -e "SHRINKED-${OPENEULER_IMG}.qcow2" ]]; then
-    errcho "SHRINKED-${OPENEULER_IMG}.qcow2 not found in $(pwd)"
+if [[ ! -e "SHRINKED-${SUSEEULER_IMG}.qcow2" ]]; then
+    errcho "SHRINKED-${SUSEEULER_IMG}.qcow2 not found in $(pwd)"
     exit 1
 fi
-obsutil cp SHRINKED-${OPENEULER_IMG}.qcow2 obs://${BUCKET_NAME}/SHRINKED-${OPENEULER_IMG}.qcow2
+obsutil cp SHRINKED-${SUSEEULER_IMG}.qcow2 obs://${BUCKET_NAME}/SHRINKED-${SUSEEULER_IMG}.qcow2
 
 echo "---- Image upload successfully, please create cloud image for hwcloud manually."
 echo "--------- $0 Done. -----------"

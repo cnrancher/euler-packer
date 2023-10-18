@@ -1,3 +1,1 @@
-# Packer configuration files for suseEuler
-
-> WIP
+# Packer configuration files for SUSE Euler Linux

@@ -1,7 +1,7 @@
 {
   "variables": {
-    "version": "{{env `OPENEULER_VERSION`}}",
-    "arch": "{{env `OPENEULER_ARCH`}}",
+    "version": "{{env `SUSEEULER_VERSION`}}",
+    "arch": "{{env `SUSEEULER_ARCH`}}",
     "tenant_name": "{{env `HWCLOUD_TENANT_NAME`}}",
     "domain_name": "{{env `HWCLOUD_DOMAIN_NAME`}}",
     "username": "{{env `HWCLOUD_USERNAME`}}",
@@ -20,10 +20,10 @@
     "username": "{{user `username`}}",
     "password": "{{user `password`}}",
     "ssh_username": "root",
-    "ssh_password": "openEuler12#$",
+    "ssh_password": "suseEuler",
     "region": "cn-east-3",
-    "image_name": "openEuler-{{user `version`}}-arm64-{{user `current_time`}}",
-    "instance_name": "PACKER-openEuler-{{user `version`}}-arm64",
+    "image_name": "SUSE-Euler-Linux-{{user `version`}}-arm64-{{user `current_time`}}",
+    "instance_name": "PACKER-SUSE-Euler-Linux-{{user `version`}}-arm64",
     "source_image": "{{user `source_image`}}",
     "availability_zone": "cn-east-3a",
     "flavor": "kc1.large.2",
@@ -37,7 +37,7 @@
       "ARCH={{user `arch`}}"
     ],
     "type": "shell",
-    "script": "../../scripts/openeuler/packer/hwcloud-install-cloud-init.sh",
+    "script": "../../scripts/suseeuler/packer/hwcloud-install-cloud-init.sh",
     "skip_clean": true
   }]
 }
