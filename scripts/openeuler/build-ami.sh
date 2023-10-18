@@ -66,9 +66,9 @@ export CURRENT_TIME=$(date +"%Y%m%d")
 export WORKING_DIR=${WORKING_DIR}
 cd $WORKING_DIR/openeuler/aws
 if [[ "${OPENEULER_ARCH}" == "x86_64" ]]; then
-    packer build ${FILE:-openeuler-aws-amis-x86_64.json}
+    packer build openeuler-aws-amis-x86_64.json
 elif [[ "${OPENEULER_ARCH}" == "aarch64" ]]; then
-    packer build ${FILE:-openeuler-aws-amis-arm64.json}
+    packer build openeuler-aws-amis-arm64.json
 else
     errcho "Unsupported Arch: ${OPENEULER_ARCH}"
     errcho "Only x86_64 and aarch64 are supported."

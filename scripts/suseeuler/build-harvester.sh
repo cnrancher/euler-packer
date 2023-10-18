@@ -51,12 +51,12 @@ export WORKING_DIR=${WORKING_DIR}
 cd $WORKING_DIR/suseeuler/harvester/
 
 if [[ "${SUSEEULER_ARCH}" == "x86_64" ]]; then
-    packer init ${FILE:-suseeuler-harvester-x86_64.pkr.hcl}
-    packer build ${FILE:-suseeuler-harvester-x86_64.pkr.hcl}
+    packer init suseeuler-harvester-x86_64.pkr.hcl
+    packer build suseeuler-harvester-x86_64.pkr.hcl
 elif [[ "${SUSEEULER_ARCH}" == "aarch64" ]]; then
     # TODO: Add aarch64 support
-    # packer init ${FILE:-suseeuler-harvester-arm64.pkr.hcln}
-    # packer build ${FILE:-suseeuler-harvester-arm64.pkr.hcln}
+    # packer init suseeuler-harvester-arm64.pkr.hcln
+    # packer build suseeuler-harvester-arm64.pkr.hcln
     errcho "aarch64 is not supported yet"
 else
     errcho "Unsupported Arch: ${SUSEEULER_ARCH}"
