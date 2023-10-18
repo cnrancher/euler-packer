@@ -53,9 +53,11 @@ export CURRENT_TIME=$(date +"%Y%m%d")
 export WORKING_DIR=${WORKING_DIR}
 cd $WORKING_DIR/suseeuler/hwcloud
 if [[ "${SUSEEULER_ARCH}" == "aarch64" ]]; then
-    packer build ${FILE:-suseeuler-huawei-kunpeng-arm64.json}
+    packer build suseeuler-huawei-kunpeng-arm64.json
+elif [[ "${SUSEEULER_ARCH}" == "x86_64" ]]; then
+    packer build suseeuler-huawei-x86_64.json
 else
     errcho "Unsupported Arch: ${SUSEEULER_ARCH}"
-    errcho "Only aarch64 are supported."
+    errcho "Only aarch64 and x86_64 are supported."
     exit 1
 fi

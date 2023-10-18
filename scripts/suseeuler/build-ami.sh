@@ -66,9 +66,9 @@ export CURRENT_TIME=$(date +"%Y%m%d")
 export WORKING_DIR=${WORKING_DIR}
 cd $WORKING_DIR/suseeuler/aws
 if [[ "${SUSEEULER_ARCH}" == "x86_64" ]]; then
-    packer build ${FILE:-suseeuler-aws-amis-x86_64.json}
+    packer build suseeuler-aws-amis-x86_64.json
 elif [[ "${SUSEEULER_ARCH}" == "aarch64" ]]; then
-    packer build ${FILE:-suseeuler-aws-amis-arm64.json}
+    packer build suseeuler-aws-amis-arm64.json
 else
     errcho "Unsupported Arch: ${SUSEEULER_ARCH}"
     errcho "Only x86_64 and aarch64 are supported."

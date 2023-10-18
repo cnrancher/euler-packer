@@ -53,9 +53,11 @@ export CURRENT_TIME=$(date +"%Y%m%d")
 export WORKING_DIR=${WORKING_DIR}
 cd $WORKING_DIR/openeuler/hwcloud
 if [[ "${OPENEULER_ARCH}" == "aarch64" ]]; then
-    packer build ${FILE:-openeuler-huawei-kunpeng-arm64.json}
+    packer build openeuler-huawei-kunpeng-arm64.json
+elif [[ "" ]]; then
+    packer build openeuler-huawei-x86_64.json
 else
     errcho "Unsupported Arch: ${OPENEULER_ARCH}"
-    errcho "Only aarch64 are supported."
+    errcho "Only aarch64 and x86_64 are supported."
     exit 1
 fi
