@@ -4,3 +4,4 @@ Dockerfile.dapper*
 /tmp
 tmp*
 .vscode
+mnt

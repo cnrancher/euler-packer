@@ -140,6 +140,20 @@ sudo sfdisk ${DEV_NUM} < partition.dump
 echo "---- Restored partition table"
 sudo fdisk -l ${DEV_NUM}
 
+# SUSE Euler Linux 2.1 need to add `rd.multipath=0` kernel parameter to
+# disable multipath, or the system will fail to boot on AWS.
+if [[ ${SUSEEULER_VERSION} == "2.1" ]]; then
+    echo "----- Update kernel parameter to disable multipath"
+    mkdir -p mnt
+    sudo mount ${PARTITION} mnt
+    sudo sed -i 's/loglevel=5/loglevel=5 rd.multipath=0/' ./mnt/boot/grub2/grub.cfg
+    echo "----- Updated kernel parameter"
+    sudo cat ./mnt/boot/grub2/grub.cfg | grep rd.multipath
+    sleep 1
+    sudo sync
+    sudo umount mnt
+fi
+
 # Disconnect nbd disk
 sudo qemu-nbd -d ${DEV_NUM}
 sleep 1

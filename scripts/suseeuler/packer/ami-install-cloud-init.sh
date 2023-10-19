@@ -38,8 +38,11 @@ yum -y --nobest update
 yum -y install cloud-init cloud-utils-growpart gdisk\
     vim tar make zip gzip wget git tmux \
     conntrack-tools socat iptables-services htop open-iscsi
-# Add `apparmor=0` in kernel parameter to disable Apparmor
-echo "GRUB_CMDLINE_LINUX_DEFAULT=\"apparmor=0\"" >> /etc/default/grub:q
+
+# Disable multipath & apparmor for public cloud
+sed -i 's/crashkernel=512M/crashkernel=512M apparmor=0 rd.multipath=0/' /etc/default/grub
+echo "GRUB config CMDLINE_LINUX_DEFAULT:"
+cat /etc/default/grub | grep CMDLINE_LINUX_DEFAULT
 
 # Ensure suseeuler user is configured in sudoers
 ensure_user_sudo_configured
