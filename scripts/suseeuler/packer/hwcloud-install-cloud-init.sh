@@ -39,10 +39,18 @@ yum -y install cloud-init cloud-utils-growpart gdisk\
     vim tar make zip gzip wget git tmux \
     conntrack-tools socat iptables-services htop open-iscsi
 
+# Install K3s SELinux dependencies
+yum -y install container-selinux selinux-policy-base
+rpm -i https://github.com/k3s-io/k3s-selinux/releases/download/v1.4.stable.1/k3s-selinux-1.4-1.el7.noarch.rpm
+
 # Disable multipath & apparmor for public cloud
 sed -i 's/crashkernel=512M/crashkernel=512M apparmor=0 rd.multipath=0/' /etc/default/grub
+# Disable GRUB timeout
+sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=1/' /etc/default/grub
 echo "GRUB config CMDLINE_LINUX_DEFAULT:"
 cat /etc/default/grub | grep CMDLINE_LINUX_DEFAULT
+echo "GRUB config GRUB_TIMEOUT:"
+cat /etc/default/grub | grep GRUB_TIMEOUT
 
 # Ensure suseeuler user is configured in sudoers
 ensure_user_sudo_configured
