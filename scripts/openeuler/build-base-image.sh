@@ -91,7 +91,7 @@ sudo fdisk -l "${DEV_NUM}"
 echo "lsblk:"
 lsblk -f
 echo "---- Finding root disk partition"
-PARTITION=$(sudo fdisk -l | grep $DEV_NUM | grep "Linux filesystem" | cut -d ' ' -f 1 || true)
+PARTITION=$(sudo fdisk -l | grep $DEV_NUM | grep "Linux" | cut -d ' ' -f 1 || true)
 if [[ -z $PARTITION ]]; then
     errcho "failed to get partition num"
     exit 1
