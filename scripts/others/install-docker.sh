@@ -2,14 +2,14 @@
 # Install docker binaries: https://docs.docker.com/engine/install/binaries/
 # Install containerd binaries: https://github.com/containerd/containerd/blob/main/docs/getting-started.md#option-1-from-the-official-binaries
 
-set -e
+set -euo pipefail
 
-# Docker release note: https://docs.docker.com/engine/release-notes/#201021
+# Docker release note: https://docs.docker.com/engine/release-notes/
 # Get stable version of Docker: https://download.docker.com/linux/static/stable
-DOCKER_VERSION="20.10.23"
-CONTAINERD_VERSION="1.6.15"
-CRICTL_VERSION="1.25.0"
-BUILDX_VERSION="0.10.0"
+DOCKER_VERSION="24.0.9"
+CONTAINERD_VERSION="1.7.13"
+CRICTL_VERSION="1.29.0"
+BUILDX_VERSION="0.11.2"
 
 if [[ "$(uname -m)" == "aarch64" ]]; then
 	DOCKER_ARCH="aarch64"
@@ -128,7 +128,7 @@ function install_containerd() {
 	echo "Extracting containerd binaries..."
 	sudo tar Czxvf /usr/local containerd.tar.gz
 
-	# https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
+	# https://github.com/containerd/containerd/blob/main/containerd.service
 	sudo bash -c 'cat > /etc/systemd/system/containerd.service <<EOF
 # Copyright The containerd Authors.
 #
@@ -200,7 +200,7 @@ function install_crictl() {
 INSTALL_CRICTL=""
 INSTALL_BUILDX=""
 while true; do
-	case "$1" in
+	case "${1:-}" in
 	--crictl )
 		echo "Install containerd with crictl ${CRICTL_VERSION} dependency."
 		INSTALL_CRICTL="true"; shift ;;
@@ -210,7 +210,7 @@ while true; do
 	-h | --help )
 		usage; exit 0 ;;
 	-* )
-		echo "Unrecognized option: $1"
+		echo "Unrecognized option: ${1:-}"
 		usage; exit 0 ;;
 	* )
 		break ;;
@@ -228,9 +228,9 @@ if [[ ! -z "${INSTALL_CRICTL}" ]]; then
 fi
 
 # Add docker user group
-sudo groupadd docker || echo -n ""
-sudo usermod -aG docker openeuler || echo -n ""
-sudo usermod -aG docker $USER || echo -n ""
+sudo groupadd docker || true
+sudo usermod -aG docker openeuler || true
+sudo usermod -aG docker $USER || true
 
 echo "Enabling and start docker services..."
 sudo systemctl daemon-reload
