@@ -1,6 +1,6 @@
 # Packer build scripts for euler systems
 
-These scripts are currently used to create [openEuler](https://www.openeuler.org/) and SUSE Euler Linux cloud image for [AWS](https://aws.amazon.com/) and [Huawei Cloud](https://www.huaweicloud.com/).
+These scripts are currently used to create [openEuler](https://www.openeuler.org/) for [AWS](https://aws.amazon.com/) and [Huawei Cloud](https://www.huaweicloud.com/).
 
 ![](/docs/images/openeuler/generated-ami.png)
 
