@@ -228,14 +228,20 @@ if [[ ! -z "${INSTALL_CRICTL}" ]]; then
 fi
 
 # Add docker user group
-sudo groupadd docker || true
-sudo usermod -aG docker openeuler || true
-sudo usermod -aG docker $USER || true
-
+if ! sudo grep -q docker /etc/group; then
+	sudo groupadd docker || true
+fi
 echo "Enabling and start docker services..."
 sudo systemctl daemon-reload
 sudo systemctl enable --now docker
 echo "Run docker version:"
 sudo docker version
+
+# Add user to the docker group
+if [[ ! -z ${USER:-} ]]; then
+	sudo usermod -aG docker $USER || true
+else
+	sudo usermod -aG docker openeuler || true
+fi
 
 echo "$0 Finished."
