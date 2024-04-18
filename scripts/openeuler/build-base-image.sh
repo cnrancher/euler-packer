@@ -99,7 +99,7 @@ fi
 echo "---- Running e2fsck"
 sudo e2fsck -fy ${PARTITION} || true # Ignore error
 echo "---- Resizing ext4 file system size..."
-sudo resize2fs ${PARTITION} 5G
+sudo resize2fs ${PARTITION} 4G
 sudo sync
 
 # Install ENA kernel module for openEuler aarch64
@@ -136,13 +136,21 @@ echo "---- Reloading partition table..."
 sudo partprobe ${DEV_NUM}
 sleep 1
 echo "---- Resizing partition size..."
-echo yes | sudo parted ${DEV_NUM} ---pretend-input-tty resizepart ${PARTITION#"${DEV_NUM}p"} 6GB
+echo yes | sudo parted ${DEV_NUM} ---pretend-input-tty resizepart ${PARTITION#"${DEV_NUM}p"} 7.5GB
 sleep 1
 echo "---- Resized partition"
 sudo fdisk -l ${DEV_NUM}
 sudo sync
 sleep 1
 sudo partprobe ${DEV_NUM}
+sleep 1
+
+# Use sfdisk to backup the shrinked partition table.
+echo "---- Backup partition table"
+sudo sfdisk --dump ${DEV_NUM} > partition-backup.dump
+sudo grep -v last-lba partition-backup.dump > partition.dump
+echo "---- partition table:"
+grep ${DEV_NUM} partition-backup.dump
 sleep 1
 
 sudo qemu-nbd -d ${DEV_NUM}
@@ -152,6 +160,31 @@ qemu-img resize ${OPENEULER_IMG}.qcow2 --shrink 8G
 qemu-img info ${OPENEULER_IMG}.qcow2
 echo "---- Finished"
 echo ""
+
+sudo qemu-nbd -c "${DEV_NUM}" "${OPENEULER_IMG}.qcow2"
+
+# Use sfdisk to restore GPT partition table.
+echo "---- Restore the partition table"
+sleep 1
+sudo sfdisk ${DEV_NUM} < partition.dump
+echo "---- Restored partition table"
+sudo fdisk -l ${DEV_NUM}
+
+echo "----- Update kernel parameter to disable multipath & built-in cloud-init"
+mkdir -p mnt
+sudo mount ${DEV_NUM}p1 mnt
+GRUB_CFG_FILE="./mnt/grub2/grub.cfg"
+if [[ "${OPENEULER_ARCH}" == "aarch64" ]]; then
+    GRUB_CFG_FILE="./mnt/efi/EFI/openEuler/grub.cfg"
+fi
+sudo sed -i 's/nomodeset/nomodeset rd.multipath=0 cloud-init=disabled/' $GRUB_CFG_FILE
+echo "----- Updated kernel parameter"
+sudo cat $GRUB_CFG_FILE | grep rd.multipath
+sleep 1
+sudo sync
+sudo umount mnt
+
+sudo qemu-nbd -d ${DEV_NUM}
 
 mv ${OPENEULER_IMG}.qcow2 SHRINKED-${OPENEULER_IMG}.qcow2
 ls -alh SHRINKED-${OPENEULER_IMG}.qcow2
