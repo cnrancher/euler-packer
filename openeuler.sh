@@ -83,7 +83,7 @@ function openeuler_hwcloud {
     export OPENEULER_VERSION=${OPENEULER_VERSION} \
         OPENEULER_ARCH=${OPENEULER_ARCH}
 
-    ${WORKINGDIR}/scripts/openeuler/openeuler/build-hwcloud.sh
+    ${WORKINGDIR}/scripts/openeuler/build-hwcloud.sh
 }
 
 function openeuler_harvester {

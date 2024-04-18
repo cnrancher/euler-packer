@@ -48,6 +48,12 @@
 
     本仓库的脚本所使用的 Packer 版本需要大于等于 1.7，请按照 [官方教程](https://developer.hashicorp.com/packer/tutorials/docker-get-started/get-started-install-cli#installing-packer) 安装 Packer。
 
+    安装 amazon ebs packer 依赖：
+
+    ```sh
+    packer plugins install github.com/hashicorp/amazon
+    ```
+
 1. 初始化 `awscli` 并配置环境变量
 
     - 执行 `aws configure`，填写 Access Key ID，Secret Key 并将区域设定为 `ap-northeast-1`。

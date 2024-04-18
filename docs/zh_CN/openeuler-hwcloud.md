@@ -47,6 +47,12 @@
 
     本仓库的脚本所使用的 Packer 建议版本为 1.7，请按照 [官方教程](https://developer.hashicorp.com/packer/tutorials/docker-get-started/get-started-install-cli#installing-packer) 安装 Packer。
 
+    安装 openstack packer 依赖。
+
+    ```sh
+    packer plugins install github.com/hashicorp/openstack
+    ```
+
     安装 `obsutil` 的教程请参考 [OBS 简介](https://support.huaweicloud.com/utiltg-obs/obs_11_0001.html)。
 
 1. 初始化 `obsutil`
