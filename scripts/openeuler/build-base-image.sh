@@ -85,6 +85,7 @@ if [[ ! -z "${nbd_loaded}" ]]; then
     sudo qemu-nbd -d "${DEV_NUM}"
 fi
 sudo qemu-nbd -c "${DEV_NUM}" "${OPENEULER_IMG}.qcow2"
+sleep 1
 echo "---- Disk layout"
 echo "fdisk:"
 sudo fdisk -l "${DEV_NUM}"
@@ -177,7 +178,8 @@ GRUB_CFG_FILE="./mnt/grub2/grub.cfg"
 if [[ "${OPENEULER_ARCH}" == "aarch64" ]]; then
     GRUB_CFG_FILE="./mnt/efi/EFI/openEuler/grub.cfg"
 fi
-sudo sed -i 's/nomodeset/nomodeset rd.multipath=0 cloud-init=disabled/' $GRUB_CFG_FILE
+
+sudo sed -i '/root=UUID=/s/$/ rd.multipath=0 cloud-init=disabled/' $GRUB_CFG_FILE
 echo "----- Updated kernel parameter"
 sudo cat $GRUB_CFG_FILE | grep rd.multipath
 sleep 1
