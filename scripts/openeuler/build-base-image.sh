@@ -18,7 +18,7 @@ if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     echo "Usage: "
     echo "      OPENEULER_VERSION=<openEuler_version> OPENEULER_ARCH=<arch> $0"
     echo "Example: "
-    echo "      OPENEULER_VERSION=22.03-LTS OPENEULER_ARCH=x86_64 $0"
+    echo "      OPENEULER_VERSION=24.03-LTS OPENEULER_ARCH=x86_64 $0"
     exit 0
 fi
 
@@ -104,7 +104,7 @@ sudo resize2fs ${PARTITION} 4G
 sudo sync
 
 # Install ENA kernel module for openEuler aarch64
-if [[ "${OPENEULER_ARCH}" == "aarch64" && "${OPENEULER_VERSION}" == "22.03-LTS" ]]; then
+if [[ "${OPENEULER_ARCH}" == "aarch64" && "${OPENEULER_VERSION}" == "24.03-LTS" ]]; then
     echo "----- Installing ENA kernel module for aarch64"
     # Create a mountpoint folder
     mkdir -p mnt

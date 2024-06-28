@@ -79,9 +79,24 @@ function openeuler_hwcloud {
         OPENEULER_ARCH="aarch64"
         echo "--arch option not provided, set to default aarch64"
     fi
+    if [[ -z "${SOURCE_IMAGE_ID:-}" ]]; then
+        errcho "--source option not provided"
+        exit 1
+    fi
+    if [[ -z "${VPC_ID:-}" ]]; then
+        errcho "--vpc option not provided"
+        exit 1
+    fi
+    if [[ -z "${SUBNET_ID:-}" ]]; then
+        errcho "--subnet option not provided"
+        exit 1
+    fi
 
     export OPENEULER_VERSION=${OPENEULER_VERSION} \
-        OPENEULER_ARCH=${OPENEULER_ARCH}
+        OPENEULER_ARCH=${OPENEULER_ARCH} \
+        SOURCE_IMAGE_ID=${SOURCE_IMAGE_ID} \
+        VPC_ID=${VPC_ID} \
+        SUBNET_ID=${SUBNET_ID}
 
     ${WORKINGDIR}/scripts/openeuler/build-hwcloud.sh
 }
@@ -128,27 +143,28 @@ function usage {
     echo "$0 \\"
     echo "    --aws \\"
     echo "    --aws-owner-id <OWNER_ID> \\"
-    echo "    --version 22.03-LTS \\"
+    echo "    --version 24.03-LTS \\"
     echo "    --arch x86_64 \\"
     echo "    --aws-bucket <BUCKET_NAME>"
     echo
     echo "构建 HWCloud 基础云镜像 (鲲鹏):"
     echo "$0 \\"
     echo "    --hwcloud-base \\"
-    echo "    --version 22.03-LTS \\"
+    echo "    --version 24.03-LTS \\"
     echo "    --arch aarch64 \\"
     echo "    --obs-bucket <BUCKET_NAME>"
     echo
     echo "构建 HWCloud 公有云镜像 (鲲鹏):"
     echo "$0 \\"
     echo "    --hwcloud \\"
-    echo "    --version 22.03-LTS \\"
-    echo "    --arch aarch64"
+    echo "    --version 24.03-LTS \\"
+    echo "    --arch aarch64 \\"
+    echo "    --source <BASE_IMAGE_ID>"
     echo
     echo "构建 Harvester 镜像:"
     echo "$0 \\"
     echo "    --harvester \\"
-    echo "    --version 22.03-LTS \\"
+    echo "    --version 24.03-LTS \\"
     echo "    --arch aarch64"
 }
 
@@ -193,6 +209,21 @@ while [[ $# -gt 0 ]]; do
         ;;
     --obs-bucket)
         OBS_BUCKET="$2"
+        shift
+        shift
+        ;;
+    --source)
+        SOURCE_IMAGE_ID="$2"
+        shift
+        shift
+        ;;
+    --vpc)
+        VPC_ID="$2"
+        shift
+        shift
+        ;;
+    --subnet)
+        SUBNET_ID="$2"
         shift
         shift
         ;;

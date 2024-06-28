@@ -45,12 +45,12 @@
     sudo apt install awscli jq qemu-utils parted fdisk util-linux
     ```
 
-    本仓库的脚本所使用的 Packer 建议版本为 1.7，请按照 [官方教程](https://developer.hashicorp.com/packer/tutorials/docker-get-started/get-started-install-cli#installing-packer) 安装 Packer。
+    请按照 [官方教程](https://developer.hashicorp.com/packer/tutorials/docker-get-started/get-started-install-cli#installing-packer) 安装 Packer。
 
-    安装 openstack packer 依赖。
+    安装 huaweicloud packer 依赖。
 
     ```sh
-    packer plugins install github.com/hashicorp/openstack
+    packer plugins install github.com/huaweicloud/huaweicloud
     ```
 
     安装 `obsutil` 的教程请参考 [OBS 简介](https://support.huaweicloud.com/utiltg-obs/obs_11_0001.html)。
@@ -64,6 +64,13 @@
     ```
 
     可使用 `obsutil ls` 检查是否配置成功。
+
+1. 设定华为云 AccessKey 环境变量：
+
+    ```bash
+    export HW_ACCESS_KEY=<AccessKey ID>
+    export HW_SECRET_KEY=<AccessKey Secret>
+    ```
 
 1. 建立 [OBS 存储桶](https://support.huaweicloud.com/obs/index.html)，用于储存 qcow2 镜像。
 
@@ -84,7 +91,7 @@
     ```bash
     ./openeuler.sh \
         --hwcloud-base \
-        --version 22.03-LTS \
+        --version 24.03-LTS \
         --arch aarch64 \
         --obs-bucket <BUCKET_NAME>
     ```
@@ -102,37 +109,19 @@
 
     ![](../images/openeuler/build-base-hwcloud-2.png)
 
-1. 参照 [华为云文档 - 使用Packer创建私有镜像](https://support.huaweicloud.com/bestpractice-ims/ims_bp_0031.html#section3) 设定下方所需的环境变量，执行脚本，使用 Packer 构建华为云镜像。
+1. 参照 [华为云文档 - 使用Packer创建私有镜像](https://support.huaweicloud.com/bestpractice-ims/ims_bp_0031.html#section3) 设定下方参数，执行脚本，使用 Packer 构建华为云镜像。
 
     ```bash
     #!/bin/bash
 
-    # See <https://support.huaweicloud.com/bestpractice-ims/ims_bp_0031.html#section3>
-    # and <https://developer.hashicorp.com/packer/plugins/builders/openstack>
-
-    # identity endpoint (身份鉴别节点地址，格式为：https://IAM的Endpoint/v3)
-    export HWCLOUD_IDENTITY_ENDPOINT="https://iam.cn-east-3.myhuaweicloud.com/v3"
-    # tenant name (项目名称)
-    export HWCLOUD_TENANT_NAME="cn-east-3"
-    # domain name (主帐号名)
-    export HWCLOUD_DOMAIN_NAME="<USER_NAME>"
-    # IAM username (IAM 用户名)
-    export HWCLOUD_USERNAME="<IAM_USER_NAME>"
-    # password of control panel (管理控制台的登录密码)
-    export HWCLOUD_PASSWORD="<IAM_USER_LOGIN PASSWD>"
-    # Subnet ID (子网网络 ID)
-    export HWCLOUD_NETWORK_ID="<SUBNET_ID>"
-    # EIP ID (弹性公网 IP 的 ID，需要手动创建一个弹性公网 IP，之后复制 ID 到此处)
-    export HWCLOUD_FLOATING_IP_ID="<EIP_ID>"
-    # source image ID (源镜像 ID)
-    export SOURCE_IMAGE_ID="<SOURCE_IMAGE_ID>"
-
     ./openeuler.sh \
         --hwcloud \
-        --version 22.03-LTS \
-        --arch aarch64
+        --version 24.03-LTS \
+        --arch aarch64 \
+        --vpc <VPC_ID> \
+        --subnet <SUBNET_ID> \
+        --source <BASE_IMAGE_ID>
     ```
-
 ----
 
 最终构建的 AMI 镜像可于 *IMS 镜像服务* 页面获取到，命名格式为：`openEuler-<VERSION>-<ARCH>-<DATETIME>`

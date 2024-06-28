@@ -23,8 +23,8 @@ if [[ -z "${AWS_ACCESS_KEY_ID}" || -z "${AWS_SECRET_ACCESS_KEY}" ]]; then
 fi
 
 if [ -z "${OPENEULER_VERSION}" ]; then
-    OPENEULER_VERSION="22.03-LTS"
-    echo "OPENEULER_VERSION not found, set to default: 22.03-LTS"
+    OPENEULER_VERSION="24.03-LTS"
+    echo "OPENEULER_VERSION not found, set to default: 24.03-LTS"
 else
     echo "OPENEULER_VERSION: ${OPENEULER_VERSION}"
 fi
