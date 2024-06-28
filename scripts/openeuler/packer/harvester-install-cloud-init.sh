@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 # This script should be running in the VM launched by packer
 
@@ -12,14 +12,14 @@ function ensure_user_sudo_configured() {
     system_info_line=$(grep -n "system_info" ${cloud_init_cfg} | cut -d: -f1)
     openeuler_user_line=$(grep -n "name: openeuler" ${cloud_init_cfg} | cut -d: -f1)
     cfg_total_lines=$(wc -l ${cloud_init_cfg} | cut -d' ' -f1)
-    openeuler_sudo=$(sed -n "${system_info_line},${cfg_total_lines}p" ${cloud_init_cfg} | grep "sudo:" || echo -n "")
-    openeuler_group=$(sed -n "${system_info_line},${cfg_total_lines}p" ${cloud_init_cfg} | grep "groups:" || echo -n "")
-    if [[ -z ${openeuler_sudo} ]]; then
-        sed -i '/name: openeuler/a \ \ \ \ \ sudo: ["ALL= (ALL) NOPASSWD: ALL"]' ${cloud_init_cfg}
+    openeuler_sudo=$(sed -n "${system_info_line},${cfg_total_lines}p" ${cloud_init_cfg} | grep "sudo:" || true)
+    openeuler_group=$(sed -n "${system_info_line},${cfg_total_lines}p" ${cloud_init_cfg} | grep "groups:" || true)
+    if [[ -z ${openeuler_sudo:-} ]]; then
+        sed -i '/name: openeuler/a \ \ \ \ sudo: ["ALL= (ALL) NOPASSWD: ALL"]' ${cloud_init_cfg}
     fi
 
-    if [[ -z ${openeuler_group} ]]; then
-        sed -i '/name: openeuler/a \ \ \ \ \ groups: [wheel, adm, systemd-journal]' ${cloud_init_cfg}
+    if [[ -z ${openeuler_group:-} ]]; then
+        sed -i '/name: openeuler/a \ \ \ \ groups: [wheel, adm, systemd-journal]' ${cloud_init_cfg}
     fi
 }
 
@@ -39,6 +39,9 @@ yum -y install cloud-init cloud-utils-growpart gdisk
 yum -y install vim tar make zip gzip wget git tmux \
     conntrack-tools socat iptables-services htop open-iscsi \
     qemu-guest-agent
+
+# Disable GRUB Timeout
+sed -i 's/GRUB_TIMEOUT=3/GRUB_TIMEOUT=3/g' /etc/default/grub
 # Add `apparmor=0` in kernel parameter to disable Apparmor
 echo "GRUB_CMDLINE_LINUX_DEFAULT=\"apparmor=0\"" >> /etc/default/grub
 
