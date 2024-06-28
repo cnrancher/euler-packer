@@ -60,7 +60,7 @@ function openeuler_hwcloud_base {
 
     export OPENEULER_VERSION=${OPENEULER_VERSION} \
         OPENEULER_ARCH=${OPENEULER_ARCH} \
-        OBS_BUCKET_NAME=${OBS_BUCKET} \
+        BUCKET_NAME=${OBS_BUCKET} \
         OPENEULER_MIRROR=${OPENEULER_MIRROR:-}
 
     ${WORKINGDIR}/scripts/openeuler/build-base-image.sh
