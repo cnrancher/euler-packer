@@ -179,7 +179,8 @@ if [[ "${OPENEULER_ARCH}" == "aarch64" ]]; then
     GRUB_CFG_FILE="./mnt/efi/EFI/openEuler/grub.cfg"
 fi
 
-sudo sed -i '/root=UUID=/s/$/ rd.multipath=0 cloud-init=disabled/' $GRUB_CFG_FILE
+sudo sed -i '/root=UUID=/s/$/ loglevel=6 rd.multipath=0 cloud-init=disabled/' $GRUB_CFG_FILE
+sudo sed -i 's/quiet//g' $GRUB_CFG_FILE # Enable grub log output.
 echo "----- Updated kernel parameter"
 sudo cat $GRUB_CFG_FILE | grep rd.multipath
 sleep 1
