@@ -43,7 +43,7 @@
 
     ```sh
     # Ubuntu / Debian
-    sudo apt install awscli jq qemu-utils parted fdisk util-linux
+    sudo apt install awscli jq qemu-utils parted fdisk util-linux wget xz-utils
     ```
 
     本仓库的脚本所使用的 Packer 版本需要大于等于 1.7，请按照 [官方教程](https://developer.hashicorp.com/packer/tutorials/docker-get-started/get-started-install-cli#installing-packer) 安装 Packer。

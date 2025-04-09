@@ -9,14 +9,14 @@ on:
 
 env:
   OPENEULER_VERSION: ${{ vars.OPENEULER_VERSION }}
-  AWS_OWNER_ID: ${{ vars.AWS_OWNER_ID }}
+  AWS_OWNER_ID: ${{ secrets.AWS_OWNER_ID }}
   AWS_BUCKET_NAME: ${{ vars.AWS_BUCKET_NAME }}
   HWCLOUD_BUCKEY_NAME: ${{ vars.HWCLOUD_BUCKEY_NAME }}
   OPENEULER_MIRROR: ${{ vars.OPENEULER_MIRROR }}
 
 jobs:
   ci:
-    runs-on: ${{ github.repository_owner == 'cnrancher' && 'org-cnrancher-runner-dind-x64' || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         os: [ linux ]
@@ -49,7 +49,7 @@ jobs:
           packer plugins install github.com/hashicorp/amazon
           packer plugins install github.com/huaweicloud/huaweicloud
 
-          sudo apt install -y make jq qemu-utils parted fdisk util-linux
+          sudo apt install -y make jq qemu-utils parted fdisk util-linux wget xz-utils kmod
       - name: openEuler ${{ env.OPENEULER_VERSION }} AWS ${{ env.ARCH }} DryRun
         run: |
           ./openeuler.sh \

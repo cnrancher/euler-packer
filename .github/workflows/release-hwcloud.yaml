@@ -13,7 +13,7 @@ env:
 
 jobs:
   build-hwcloud-base:
-    runs-on: ${{ github.repository_owner == 'cnrancher' && 'org-cnrancher-runner-dind-x64' || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         os: [ linux ]
@@ -45,7 +45,7 @@ jobs:
           packer version
           packer plugins install github.com/huaweicloud/huaweicloud
 
-          sudo apt install -y make jq qemu-utils parted fdisk util-linux
+          sudo apt install -y make jq qemu-utils parted fdisk util-linux wget xz-utils kmod
       - name: openEuler ${{ env.OPENEULER_VERSION }} HWCloud ${{ env.ARCH }} Image
         env:
           HW_ACCESS_KEY: ${{ secrets.HW_ACCESS_KEY }}

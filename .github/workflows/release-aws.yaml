@@ -11,7 +11,7 @@ env:
 
 jobs:
   build-aws:
-    runs-on: ${{ github.repository_owner == 'cnrancher' && 'org-cnrancher-runner-dind-x64' || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         os: [ linux ]
@@ -44,7 +44,7 @@ jobs:
           packer plugins install github.com/hashicorp/amazon
           packer plugins install github.com/huaweicloud/huaweicloud
 
-          sudo apt install -y make jq qemu-utils parted fdisk util-linux
+          sudo apt install -y make jq qemu-utils parted fdisk util-linux wget xz-utils kmod
 
           # Set AWS default region
           mkdir -p ~/.aws

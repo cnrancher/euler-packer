@@ -42,7 +42,7 @@
 
     ```sh
     # Ubuntu
-    sudo apt install awscli jq qemu-utils parted fdisk util-linux
+    sudo apt install awscli jq qemu-utils parted fdisk util-linux wget xz-utils
     ```
 
     请按照 [官方教程](https://developer.hashicorp.com/packer/tutorials/docker-get-started/get-started-install-cli#installing-packer) 安装 Packer。
@@ -57,7 +57,7 @@
 
 1. 初始化 `obsutil`
 
-    设定 `obsutil` 的默认 endpoint 为 `ap-southeast-1` (华东-上海一区)。
+    设定 `obsutil` 的默认 endpoint 为 `ap-southeast-1` (香港)。
 
     ```sh
     obsutil config -i=<AK> -k=<SK> -e=obs.ap-southeast-1.myhuaweicloud.com
