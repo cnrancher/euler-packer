@@ -12,7 +12,7 @@ env:
   HWCLOUD_REGION: "ap-southeast-1" # HongKong
 
 jobs:
-  build-hwcloud-base:
+  build-hwcloud:
     runs-on: ubuntu-latest
     strategy:
       matrix:
