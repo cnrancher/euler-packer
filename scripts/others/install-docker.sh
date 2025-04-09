@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 # Install docker binaries: https://docs.docker.com/engine/install/binaries/
 # Install containerd binaries: https://github.com/containerd/containerd/blob/main/docs/getting-started.md#option-1-from-the-official-binaries
+# Install cri-tools binaries: https://github.com/kubernetes-sigs/cri-tools/releases
 
 set -euo pipefail
 
 # Docker release note: https://docs.docker.com/engine/release-notes/
 # Get stable version of Docker: https://download.docker.com/linux/static/stable
-DOCKER_VERSION="24.0.9"
-CONTAINERD_VERSION="1.7.13"
-CRICTL_VERSION="1.29.0"
-BUILDX_VERSION="0.11.2"
+DOCKER_VERSION="27.5.1"
+CONTAINERD_VERSION="1.7.25"
+CRICTL_VERSION="1.32.0"
+BUILDX_VERSION="0.20.0"
 
 if [[ "$(uname -m)" == "aarch64" ]]; then
 	DOCKER_ARCH="aarch64"
