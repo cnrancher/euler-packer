@@ -1,0 +1,62 @@
+name: Build HWCloud Base Image
+on:
+  workflow_dispatch:
+
+env:
+  OPENEULER_VERSION: ${{ vars.OPENEULER_VERSION }}
+  HWCLOUD_BUCKEY_NAME: ${{ vars.HWCLOUD_BUCKEY_NAME }}
+  OPENEULER_MIRROR: ${{ vars.OPENEULER_MIRROR }}
+  HWCLOUD_REGION: "ap-southeast-1" # HongKong
+
+jobs:
+  build-hwcloud-base:
+    runs-on: ${{ github.repository_owner == 'cnrancher' && 'org-cnrancher-runner-dind-x64' || 'ubuntu-latest' }}
+    strategy:
+      matrix:
+        os: [ linux ]
+        arch: [ aarch64 ] # aarch64 only for HWCloud
+    permissions:
+      contents: read
+    env:
+      ARCH: ${{ matrix.arch }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Install dependencies
+        run: |
+          set -x
+
+          # The official GitHub Action runners have awscli installed by default
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+          aws --version
+
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt-get update && sudo apt-get install packer
+          packer version
+          packer plugins install github.com/huaweicloud/huaweicloud
+
+          sudo apt install -y make jq qemu-utils parted fdisk util-linux
+
+          # Install obsutil
+          wget https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_linux_amd64.tar.gz
+          tar xvf ./obsutil_*
+          sudo mv obsutil_linux_amd64_*/ /usr/local/bin
+      - name: Configure obsutil
+        run: |
+            obsutil config -i=${{ secrets.HW_ACCESS_KEY }} -k=${{ secrets.HW_SECRET_KEY }} -e=obs.ap-southeast-1.myhuaweicloud.com
+      - name: openEuler ${{ env.OPENEULER_VERSION }} HWCloud ${{ env.ARCH }} Base Image
+        env:
+          HW_ACCESS_KEY: ${{ secrets.HW_ACCESS_KEY }}
+          HW_SECRET_KEY: ${{ secrets.HW_SECRET_KEY }}
+        run: |
+          ./openeuler.sh \
+              --hwcloud-base \
+              --version ${{ env.OPENEULER_VERSION }} \
+              --arch ${{ env.ARCH }} \
+              --obs-bucket ${{ env.HWCLOUD_BUCKEY_NAME }} \
+              --mirror ${{ env.OPENEULER_MIRROR }}

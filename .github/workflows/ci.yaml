@@ -1,0 +1,71 @@
+name: CI
+on:
+  pull_request:
+  push:
+    tags-ignore: [ '**' ]
+    branches:
+      - main
+      - dev*
+
+env:
+  OPENEULER_VERSION: ${{ vars.OPENEULER_VERSION }}
+  AWS_OWNER_ID: ${{ vars.AWS_OWNER_ID }}
+  AWS_BUCKET_NAME: ${{ vars.AWS_BUCKET_NAME }}
+  HWCLOUD_BUCKEY_NAME: ${{ vars.HWCLOUD_BUCKEY_NAME }}
+  OPENEULER_MIRROR: ${{ vars.OPENEULER_MIRROR }}
+
+jobs:
+  ci:
+    runs-on: ${{ github.repository_owner == 'cnrancher' && 'org-cnrancher-runner-dind-x64' || 'ubuntu-latest' }}
+    strategy:
+      matrix:
+        os: [ linux ]
+        arch: [ x86_64 ]
+    permissions:
+      contents: read
+    env:
+      ARCH: ${{ matrix.arch }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Install dependencies
+        run: |
+          set -x
+
+          # The official GitHub Action runners have awscli installed by default
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+          aws --version
+
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt-get update && sudo apt-get install packer
+          packer version
+          packer plugins install github.com/hashicorp/amazon
+          packer plugins install github.com/huaweicloud/huaweicloud
+
+          sudo apt install -y make jq qemu-utils parted fdisk util-linux
+      - name: openEuler ${{ env.OPENEULER_VERSION }} AWS ${{ env.ARCH }} DryRun
+        run: |
+          ./openeuler.sh \
+              --aws \
+              --version ${{ env.OPENEULER_VERSION }} \
+              --arch ${{ env.ARCH }} \
+              --aws-bucket ${{ env.AWS_BUCKET_NAME }} \
+              --aws-owner-id ${{ env.AWS_OWNER_ID }} \
+              --mirror "${{ env.OPENEULER_MIRROR }}" \
+              --debug \
+              --dry-run
+      - name: openEuler ${{ env.OPENEULER_VERSION }} HWCloud ${{ env.ARCH }} DryRun
+        run: |
+          ./openeuler.sh \
+              --hwcloud-base \
+              --version ${{ env.OPENEULER_VERSION }} \
+              --arch ${{ env.ARCH }} \
+              --obs-bucket ${{ env.HWCLOUD_BUCKEY_NAME }} \
+              --mirror "${{ env.OPENEULER_MIRROR }}" \
+              --debug \
+              --dry-run

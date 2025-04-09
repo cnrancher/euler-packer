@@ -34,7 +34,9 @@ function openeuler_aws {
         OPENEULER_ARCH=${OPENEULER_ARCH} \
         BUCKET_NAME=${AWS_BUCKET} \
         AWS_BASE_AMI_OWNER_ID=${AWS_OWNER_ID} \
-        OPENEULER_MIRROR=${OPENEULER_MIRROR:-}
+        OPENEULER_MIRROR=${OPENEULER_MIRROR:-} \
+        DRY_RUN=${DRY_RUN:-} \
+        AUTO_YES=${AUTO_YES:-}
 
     ${WORKINGDIR}/scripts/openeuler/build-base-image.sh
     ${WORKINGDIR}/scripts/openeuler/build-base-ami.sh
@@ -61,7 +63,9 @@ function openeuler_hwcloud_base {
     export OPENEULER_VERSION=${OPENEULER_VERSION} \
         OPENEULER_ARCH=${OPENEULER_ARCH} \
         BUCKET_NAME=${OBS_BUCKET} \
-        OPENEULER_MIRROR=${OPENEULER_MIRROR:-}
+        OPENEULER_MIRROR=${OPENEULER_MIRROR:-} \
+        DRY_RUN=${DRY_RUN:-} \
+        AUTO_YES=${AUTO_YES:-}
 
     ${WORKINGDIR}/scripts/openeuler/build-base-image.sh
     ${WORKINGDIR}/scripts/openeuler/build-hwcloud-base-image.sh
@@ -96,7 +100,9 @@ function openeuler_hwcloud {
         OPENEULER_ARCH=${OPENEULER_ARCH} \
         SOURCE_IMAGE_ID=${SOURCE_IMAGE_ID} \
         VPC_ID=${VPC_ID} \
-        SUBNET_ID=${SUBNET_ID}
+        SUBNET_ID=${SUBNET_ID} \
+        DRY_RUN=${DRY_RUN:-} \
+        AUTO_YES=${AUTO_YES:-}
 
     ${WORKINGDIR}/scripts/openeuler/build-hwcloud.sh
 }
@@ -116,7 +122,9 @@ function openeuler_harvester {
 
     export OPENEULER_VERSION=${OPENEULER_VERSION} \
         OPENEULER_ARCH=${OPENEULER_ARCH} \
-        OPENEULER_MIRROR=${OPENEULER_MIRROR:-}
+        OPENEULER_MIRROR=${OPENEULER_MIRROR:-} \
+        DRY_RUN=${DRY_RUN:-} \
+        AUTO_YES=${AUTO_YES:-}
 
     ${WORKINGDIR}/scripts/openeuler/build-base-image.sh
     ${WORKINGDIR}/scripts/openeuler/build-harvester.sh
@@ -136,6 +144,8 @@ function usage {
     echo '    [--aws-bucket text]   AWS S3 存储桶名称'
     echo '    [--obs-bucket text]   华为云 OBS 存储桶名称'
     echo '    [--mirror text]       下载 openEuler qcow2 镜像源'
+    echo '    [--dry-run]           仅本地构建镜像，不上传至云端'
+    echo '    [--auto-yes]          跳过确认（用于执行脚本）'
     echo '    [--debug]             显示调试信息'
     echo
     echo "Example:"
@@ -143,28 +153,28 @@ function usage {
     echo "$0 \\"
     echo "    --aws \\"
     echo "    --aws-owner-id <OWNER_ID> \\"
-    echo "    --version 24.03-LTS \\"
+    echo "    --version 24.03-LTS-SP1 \\"
     echo "    --arch x86_64 \\"
     echo "    --aws-bucket <BUCKET_NAME>"
     echo
     echo "构建 HWCloud 基础云镜像 (鲲鹏):"
     echo "$0 \\"
     echo "    --hwcloud-base \\"
-    echo "    --version 24.03-LTS \\"
+    echo "    --version 24.03-LTS-SP1 \\"
     echo "    --arch aarch64 \\"
     echo "    --obs-bucket <BUCKET_NAME>"
     echo
     echo "构建 HWCloud 公有云镜像 (鲲鹏):"
     echo "$0 \\"
     echo "    --hwcloud \\"
-    echo "    --version 24.03-LTS \\"
+    echo "    --version 24.03-LTS-SP1 \\"
     echo "    --arch aarch64 \\"
     echo "    --source <BASE_IMAGE_ID>"
     echo
     echo "构建 Harvester 镜像:"
     echo "$0 \\"
     echo "    --harvester \\"
-    echo "    --version 24.03-LTS \\"
+    echo "    --version 24.03-LTS-SP1 \\"
     echo "    --arch aarch64"
 }
 
@@ -230,6 +240,14 @@ while [[ $# -gt 0 ]]; do
     --mirror)
         OPENEULER_MIRROR="$2"
         shift
+        shift
+        ;;
+    --dry-run)
+        DRY_RUN="true"
+        shift
+        ;;
+    --auto-yes)
+        AUTO_YES="true"
         shift
         ;;
     --debug)

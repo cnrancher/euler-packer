@@ -10,6 +10,11 @@ function errcho() {
    >&2 echo $@;
 }
 
+if [[ ! -z ${DRY_RUN:-} ]]; then
+   echo "Dry-run enabled, skip hwcloud-base-image"
+   exit 0
+fi
+
 # Set working dir to root dir of this project
 cd $(dirname $0)/../../
 export WORKING_DIR=$(pwd)
@@ -23,7 +28,7 @@ if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     echo "Usage: "
     echo "      OPENEULER_VERSION=<openEuler_version> OPENEULER_ARCH=<arch> BUCKET_NAME=<bucket-name> BUCKET_LOCATION=<region> $0"
     echo "Example: "
-    echo "      OPENEULER_VERSION=24.03-LTS OPENEULER_ARCH=x86_64 BUCKET_NAME=openeuler-packer BUCKET_LOCATION=cn-east-3 $0"
+    echo "      OPENEULER_VERSION=24.03-LTS-SP1 OPENEULER_ARCH=x86_64 BUCKET_NAME=openeuler-packer BUCKET_LOCATION=ap-southeast-1 $0"
     exit 0
 fi
 
@@ -49,8 +54,8 @@ else
 fi
 
 if [[ -z "${BUCKET_LOCATION}" ]]; then
-    echo "---- BUCKET_LOCATION not found, set to default: cn-east-3"
-    BUCKET_LOCATION="cn-east-3"
+    echo "---- BUCKET_LOCATION not found, set to default: ap-southeast-1"
+    BUCKET_LOCATION="ap-southeast-1"
 else
     echo "---- BUCKET_LOCATION: ${BUCKET_LOCATION}"
 fi
