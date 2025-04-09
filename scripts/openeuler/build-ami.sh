@@ -12,6 +12,11 @@ function errcho() {
    >&2 echo $@;
 }
 
+if [[ ! -z ${DRY_RUN:-} ]]; then
+   echo "Dry-run enabled, skip build ami"
+   exit 0
+fi
+
 if [[ $(uname) == "Darwin" ]]; then
     errcho "macOS is not supported"
     exit 1
@@ -23,8 +28,8 @@ if [[ -z "${AWS_ACCESS_KEY_ID}" || -z "${AWS_SECRET_ACCESS_KEY}" ]]; then
 fi
 
 if [ -z "${OPENEULER_VERSION}" ]; then
-    OPENEULER_VERSION="24.03-LTS"
-    echo "OPENEULER_VERSION not found, set to default: 24.03-LTS"
+    OPENEULER_VERSION="24.03-LTS-SP1"
+    echo "OPENEULER_VERSION not found, set to default: 24.03-LTS-SP1"
 else
     echo "OPENEULER_VERSION: ${OPENEULER_VERSION}"
 fi

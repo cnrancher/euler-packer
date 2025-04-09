@@ -17,8 +17,8 @@ variables {
 }
 
 source "huaweicloud-ecs" "artifact" {
-  region            = "cn-east-3"
-  availability_zone = "cn-east-3d"
+  region            = "ap-southeast-1"
+  availability_zone = "ap-southeast-1d"
   flavor            = "kc2.large.2"
   source_image      = "${var.source_image}"
   image_name        = "openEuler-${var.version}-arm64-${var.current_time}"

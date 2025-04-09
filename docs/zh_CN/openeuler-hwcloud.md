@@ -57,10 +57,10 @@
 
 1. 初始化 `obsutil`
 
-    设定 `obsutil` 的默认 endpoint 为 `cn-east-3` (华东-上海一区)。
+    设定 `obsutil` 的默认 endpoint 为 `ap-southeast-1` (华东-上海一区)。
 
     ```sh
-    obsutil config -i=<AK> -k=<SK> -e=obs.cn-east-3.myhuaweicloud.com
+    obsutil config -i=<AK> -k=<SK> -e=obs.ap-southeast-1.myhuaweicloud.com
     ```
 
     可使用 `obsutil ls` 检查是否配置成功。
@@ -91,7 +91,7 @@
     ```bash
     ./openeuler.sh \
         --hwcloud-base \
-        --version 24.03-LTS \
+        --version 24.03-LTS-SP1 \
         --arch aarch64 \
         --obs-bucket <BUCKET_NAME>
     ```
@@ -116,7 +116,7 @@
 
     ./openeuler.sh \
         --hwcloud \
-        --version 24.03-LTS \
+        --version 24.03-LTS-SP1 \
         --arch aarch64 \
         --vpc <VPC_ID> \
         --subnet <SUBNET_ID> \

@@ -88,7 +88,7 @@
     --aws \
     --aws-bucket <BUCKET_NAME>
     --aws-owner-id <OWNER_ID> \
-    --version "24.03-LTS" \
+    --version "24.03-LTS-SP1" \
     --arch "x86_64" \
 ```
 
@@ -106,7 +106,7 @@
 
 ## 其他
 
-1. `24.03-LTS` 版本 `aarch64` 架构的 Linux 内核未包含 [ENA](https://github.com/amzn/amzn-drivers/tree/master/kernel/linux/ena) 网卡驱动，在构建此版本 `aarch64` 架构的 openEuler 镜像时会下载已编译好的 ENA 网卡驱动至 `/opt/ena-driver/ena.ko`，并配置 `modprobe` 在开机时自动加载此网卡驱动。
+1. `22.03-LTS` 版本 `aarch64` 架构的 Linux 内核未包含 [ENA](https://github.com/amzn/amzn-drivers/tree/master/kernel/linux/ena) 网卡驱动，在构建此版本 `aarch64` 架构的 openEuler 镜像时会下载已编译好的 ENA 网卡驱动至 `/opt/ena-driver/ena.ko`，并配置 `modprobe` 在开机时自动加载此网卡驱动。
 
     在使用 AMI 镜像时请勿删除此文件，否则将无法连接至网络。
 
