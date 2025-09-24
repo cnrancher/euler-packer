@@ -2,13 +2,18 @@ name: Build HWCloud IMS Image
 on:
   workflow_dispatch:
     inputs:
+      OPENEULER_VERSION:
+        description: 'openEuler Version'
+        default: '24.03-LTS-SP2'
+        type: string
+        required: true
       BASE_IMAGE_ID:
         description: 'HWCloud IMS Base Image ID'
         default: ''
         required: true
 
 env:
-  OPENEULER_VERSION: ${{ vars.OPENEULER_VERSION }}
+  OPENEULER_VERSION: ${{ github.event.inputs.OPENEULER_VERSION }}
   HWCLOUD_REGION: "ap-southeast-1" # HongKong
 
 jobs:

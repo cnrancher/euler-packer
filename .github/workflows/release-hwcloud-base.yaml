@@ -1,11 +1,22 @@
 name: Build HWCloud Base Image
 on:
   workflow_dispatch:
+    inputs:
+      OPENEULER_VERSION:
+        description: 'openEuler Version'
+        default: '24.03-LTS-SP2'
+        type: string
+        required: true
+      OPENEULER_MIRROR:
+        description: 'openEuler Mirror'
+        default: 'https://mirrors.ocf.berkeley.edu/openeuler'
+        type: string
+        required: false
 
 env:
-  OPENEULER_VERSION: ${{ vars.OPENEULER_VERSION }}
+  OPENEULER_VERSION: ${{ github.event.inputs.OPENEULER_VERSION }}
   HWCLOUD_BUCKEY_NAME: ${{ vars.HWCLOUD_BUCKEY_NAME }}
-  OPENEULER_MIRROR: ${{ vars.OPENEULER_MIRROR }}
+  OPENEULER_MIRROR: ${{ github.event.inputs.OPENEULER_MIRROR }}
   HWCLOUD_REGION: "ap-southeast-1" # HongKong
 
 jobs:
