@@ -153,28 +153,28 @@ function usage {
     echo "$0 \\"
     echo "    --aws \\"
     echo "    --aws-owner-id <OWNER_ID> \\"
-    echo "    --version 24.03-LTS-SP1 \\"
+    echo "    --version 24.03-LTS-SP2 \\"
     echo "    --arch x86_64 \\"
     echo "    --aws-bucket <BUCKET_NAME>"
     echo
     echo "构建 HWCloud 基础云镜像 (鲲鹏):"
     echo "$0 \\"
     echo "    --hwcloud-base \\"
-    echo "    --version 24.03-LTS-SP1 \\"
+    echo "    --version 24.03-LTS-SP2 \\"
     echo "    --arch aarch64 \\"
     echo "    --obs-bucket <BUCKET_NAME>"
     echo
     echo "构建 HWCloud 公有云镜像 (鲲鹏):"
     echo "$0 \\"
     echo "    --hwcloud \\"
-    echo "    --version 24.03-LTS-SP1 \\"
+    echo "    --version 24.03-LTS-SP2 \\"
     echo "    --arch aarch64 \\"
     echo "    --source <BASE_IMAGE_ID>"
     echo
     echo "构建 Harvester 镜像:"
     echo "$0 \\"
     echo "    --harvester \\"
-    echo "    --version 24.03-LTS-SP1 \\"
+    echo "    --version 24.03-LTS-SP2 \\"
     echo "    --arch aarch64"
 }
 

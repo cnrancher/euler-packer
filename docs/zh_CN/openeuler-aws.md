@@ -88,7 +88,7 @@
     --aws \
     --aws-bucket <BUCKET_NAME>
     --aws-owner-id <OWNER_ID> \
-    --version "24.03-LTS-SP1" \
+    --version "24.03-LTS-SP2" \
     --arch "x86_64" \
 ```
 

@@ -28,7 +28,7 @@ if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     echo "Usage: "
     echo "      OPENEULER_VERSION=<openEuler_version> OPENEULER_ARCH=<arch> BUCKET_NAME=<bucket-name> BUCKET_LOCATION=<region> $0"
     echo "Example: "
-    echo "      OPENEULER_VERSION=24.03-LTS-SP1 OPENEULER_ARCH=x86_64 BUCKET_NAME=openeuler-packer BUCKET_LOCATION=ap-southeast-1 $0"
+    echo "      OPENEULER_VERSION=24.03-LTS-SP2 OPENEULER_ARCH=x86_64 BUCKET_NAME=openeuler-packer BUCKET_LOCATION=ap-southeast-1 $0"
     exit 0
 fi
 

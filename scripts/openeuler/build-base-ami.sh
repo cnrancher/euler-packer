@@ -27,7 +27,7 @@ if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     echo "Usage: "
     echo "      BUCKET_NAME=<bucket name> OPENEULER_VERSION=<version> OPENEULER_ARCH=<arch> $0"
     echo "Example: "
-    echo "      BUCKET_NAME=example-bucket OPENEULER_VERSION=24.03-LTS-SP1 OPENEULER_ARCH=x86_64 $0"
+    echo "      BUCKET_NAME=example-bucket OPENEULER_VERSION=24.03-LTS-SP2 OPENEULER_ARCH=x86_64 $0"
     exit 0
 fi
 

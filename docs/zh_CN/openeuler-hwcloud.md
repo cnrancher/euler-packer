@@ -91,7 +91,7 @@
     ```bash
     ./openeuler.sh \
         --hwcloud-base \
-        --version 24.03-LTS-SP1 \
+        --version 24.03-LTS-SP2 \
         --arch aarch64 \
         --obs-bucket <BUCKET_NAME>
     ```
@@ -116,7 +116,7 @@
 
     ./openeuler.sh \
         --hwcloud \
-        --version 24.03-LTS-SP1 \
+        --version 24.03-LTS-SP2 \
         --arch aarch64 \
         --vpc <VPC_ID> \
         --subnet <SUBNET_ID> \
