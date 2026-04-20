@@ -29,6 +29,11 @@ if [ -z "$ARCH" ]; then
 fi
 
 echo "----------------------------------------"
+echo "Disk layout:"
+lsblk
+echo "Disk usage:"
+df -h
+echo
 
 # Delete default root password
 passwd -d root
@@ -41,7 +46,7 @@ yum -y install vim tar make zip gzip wget git tmux \
     qemu-guest-agent
 
 # Disable GRUB Timeout
-sed -i 's/GRUB_TIMEOUT=3/GRUB_TIMEOUT=3/g' /etc/default/grub
+sed -i 's/GRUB_TIMEOUT=3/GRUB_TIMEOUT=1/g' /etc/default/grub
 # Add `apparmor=0` in kernel parameter to disable Apparmor
 echo "GRUB_CMDLINE_LINUX_DEFAULT=\"apparmor=0\"" >> /etc/default/grub
 

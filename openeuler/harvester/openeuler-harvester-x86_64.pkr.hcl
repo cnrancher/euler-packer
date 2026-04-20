@@ -20,7 +20,7 @@ source "qemu" "harvester_base_image" {
   iso_checksum     = "none"
   output_directory = "${var.working_dir}/harvester_image_output/"
   shutdown_command = "echo 'packer' | sudo -S shutdown -P now"
-  disk_size        = "8G"
+  disk_size        = "40G"
   format           = "qcow2"
   accelerator      = "none"
   #http_directory    = "path/to/httpdir"

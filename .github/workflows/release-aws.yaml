@@ -4,7 +4,7 @@ on:
     inputs:
       OPENEULER_VERSION:
         description: 'openEuler Version'
-        default: '24.03-LTS-SP2'
+        default: '24.03-LTS-SP3'
         type: string
         required: true
       OPENEULER_MIRROR:

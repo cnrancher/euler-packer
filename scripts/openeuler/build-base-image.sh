@@ -63,7 +63,7 @@ else
         echo "---- ${OPENEULER_IMG}.qcow2.xz already exists, skip downloading..."
     else
         echo "---- Downloading image..."
-        wget "${OPENEULER_DOWNLOAD_LINK}"
+        wget --no-verbose "${OPENEULER_DOWNLOAD_LINK}"
     fi
     echo "---- Uncompressing image ..."
     unxz "${OPENEULER_IMG}.qcow2.xz"
@@ -95,79 +95,6 @@ if [[ -z $PARTITION ]]; then
     errcho "failed to get partition num"
     exit 1
 fi
-echo "---- Running e2fsck"
-sudo e2fsck -fy ${PARTITION} || true # Ignore error
-echo "---- Resizing ext4 file system size..."
-sudo resize2fs ${PARTITION} 4G
-sudo sync
-
-# Install ENA kernel module for openEuler aarch64
-if [[ "${OPENEULER_ARCH}" == "aarch64" && "${OPENEULER_VERSION}" == "22.03-LTS" ]]; then
-    echo "----- Installing ENA kernel module for aarch64"
-    # Create a mountpoint folder
-    mkdir -p mnt
-    # Mount root and boot partition to mountpoint
-    sudo mount ${PARTITION} mnt
-    sudo mount ${DEV_NUM}p1 mnt/boot
-
-    # Download pre-compiled ENA kernel module from GitHub Release.
-    wget "https://github.com/STARRY-S/amzn-drivers/releases/download/${OPENEULER_VERSION}/ena.ko" || echo "----- Download failed"
-    if [[ -e "ena.ko" ]]; then
-        # Move kernel module to root home dir
-        sudo mkdir -p mnt/opt/ena-driver/
-        sudo mv ./ena.ko mnt/opt/ena-driver/
-        # Create configuration for modprobe
-        sudo bash -c ' echo "install ena insmod /opt/ena-driver/ena.ko" >> mnt/etc/modprobe.d/ena.conf '
-        # Auto load module when startup
-        sudo bash -c ' echo "ena" >> mnt/etc/modules-load.d/ena.conf '
-        sudo sync
-        sudo umount -R mnt
-        echo "----- Install finished"
-    else
-        echo "----- Failed to download ena.ko"
-    fi
-fi
-
-# Add some timeout to avoid device busy error
-sleep 1
-# Reload partition table to avoid device or resource busy
-echo "---- Reloading partition table..."
-sudo partprobe ${DEV_NUM}
-sleep 1
-echo "---- Resizing partition size..."
-echo yes | sudo parted ${DEV_NUM} ---pretend-input-tty resizepart ${PARTITION#"${DEV_NUM}p"} 7.5GB
-sleep 1
-echo "---- Resized partition"
-sudo fdisk -l ${DEV_NUM}
-sudo sync
-sleep 1
-sudo partprobe ${DEV_NUM}
-sleep 1
-
-# Use sfdisk to backup the shrinked partition table.
-echo "---- Backup partition table"
-sudo sfdisk --dump ${DEV_NUM} > partition-backup.dump
-sudo grep -v last-lba partition-backup.dump > partition.dump
-echo "---- partition table:"
-grep ${DEV_NUM} partition-backup.dump
-sleep 1
-
-sudo qemu-nbd -d ${DEV_NUM}
-
-echo "---- Shrinking qcow2 image size..."
-qemu-img resize ${OPENEULER_IMG}.qcow2 --shrink 8G
-qemu-img info ${OPENEULER_IMG}.qcow2
-echo "---- Finished"
-echo ""
-
-sudo qemu-nbd -c "${DEV_NUM}" "${OPENEULER_IMG}.qcow2"
-
-# Use sfdisk to restore GPT partition table.
-echo "---- Restore the partition table"
-sleep 1
-sudo sfdisk ${DEV_NUM} < partition.dump
-echo "---- Restored partition table"
-sudo fdisk -l ${DEV_NUM}
 
 echo "----- Update kernel parameter to disable multipath & built-in cloud-init"
 mkdir -p mnt

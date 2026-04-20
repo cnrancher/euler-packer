@@ -27,7 +27,7 @@ if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     echo "Usage: "
     echo "      BUCKET_NAME=<bucket name> OPENEULER_VERSION=<version> OPENEULER_ARCH=<arch> $0"
     echo "Example: "
-    echo "      BUCKET_NAME=example-bucket OPENEULER_VERSION=24.03-LTS-SP2 OPENEULER_ARCH=x86_64 $0"
+    echo "      BUCKET_NAME=example-bucket OPENEULER_VERSION=24.03-LTS-SP3 OPENEULER_ARCH=x86_64 $0"
     exit 0
 fi
 
@@ -57,26 +57,30 @@ OPENEULER_IMG="openEuler-${OPENEULER_VERSION}-${OPENEULER_ARCH}"
 cd $WORKING_DIR/tmp
 echo "---- Current dir: $(pwd)"
 
-echo "---- Converting SHRINKED-${OPENEULER_IMG}.qcow2 to RAW image..."
+echo "---- Converting SHRINKED-${OPENEULER_IMG}.qcow2 to VMDK image..."
 if [[ ! -e "SHRINKED-${OPENEULER_IMG}.qcow2" ]]; then
    errcho "File 'SHRINKED-${OPENEULER_IMG}.qcow2' not found in 'tmp/' folder!"
    exit 1
 fi
-qemu-img convert SHRINKED-${OPENEULER_IMG}.qcow2 ${OPENEULER_IMG}.raw
+qemu-img convert -c -f qcow2 -O vmdk -o subformat=streamOptimized SHRINKED-${OPENEULER_IMG}.qcow2 ${OPENEULER_IMG}.vmdk
 
-echo "---- Uploading RAW image to S3 Bucket..."
-EXISTS=$(aws s3 ls ${BUCKET_NAME}/${OPENEULER_IMG}.raw || echo -n "false")
+echo "---- Converted VMDK file:"
+ls -alh ./*
+echo
+
+echo "---- Uploading VMDK image to S3 Bucket..."
+EXISTS=$(aws s3 ls ${BUCKET_NAME}/${OPENEULER_IMG}.vmdk || echo -n "false")
 if [[ "${EXISTS}" == "false" ]]; then
    echo "--- aws s3 cp"
-   aws s3 cp ${OPENEULER_IMG}.raw s3://${BUCKET_NAME}/
+   aws s3 cp ${OPENEULER_IMG}.vmdk s3://${BUCKET_NAME}/ --no-progress
 else
-   echo "---- File ${OPENEULER_IMG}.raw already uploaded on S3, delete and re-upload it?"
-   read -p "---- [y/N]: " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || DELETE="false"
+   echo "---- File ${OPENEULER_IMG}.vmdk already uploaded on S3, delete and re-upload it?"
+   read -p "---- [Y/n]: " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || DELETE="true"
    if [[ "$DELETE" == "false" ]]; then
       echo "----- Skip re-upload."
    else
-      aws s3 rm s3://${BUCKET_NAME}/${OPENEULER_IMG}.raw
-      aws s3 cp ${OPENEULER_IMG}.raw s3://${BUCKET_NAME}/
+      aws s3 rm s3://${BUCKET_NAME}/${OPENEULER_IMG}.vmdk
+      aws s3 cp ${OPENEULER_IMG}.vmdk s3://${BUCKET_NAME}/ --no-progress
    fi
 fi
 
@@ -150,9 +154,9 @@ aws iam put-role-policy --role-name vmimport --policy-name vmimport --policy-doc
 
 echo "---- Importing image..."
 aws ec2 import-snapshot \
-   --description "openEuler RAW image import task" \
+   --description "openEuler VMDK image import task" \
    --disk-container \
-   "Format=RAW,UserBucket={S3Bucket=${BUCKET_NAME},S3Key=${OPENEULER_IMG}.raw}" > import-output.txt
+   "Format=VMDK,UserBucket={S3Bucket=${BUCKET_NAME},S3Key=${OPENEULER_IMG}.vmdk}" > import-output.txt
 cat import-output.txt
 echo "---- Import task created."
 
@@ -162,7 +166,7 @@ echo "----- IMPORT_TAST_ID: ${IMPORT_TAST_ID}"
 echo "---- Waiting snapshot create completed..."
 while [[ "${IMPORT_STATUS_MESSAGE}" != "completed" ]]
 do
-   sleep 2
+   sleep 20
    aws ec2 describe-import-snapshot-tasks \
       --import-task-ids ${IMPORT_TAST_ID} > import-output.txt
    IMPORT_STATUS_MESSAGE=$(cat import-output.txt | jq -r ".ImportSnapshotTasks[0].SnapshotTaskDetail.Status")

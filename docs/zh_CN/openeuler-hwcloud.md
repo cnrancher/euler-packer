@@ -15,7 +15,7 @@
 1. 构建本地基础镜像 (base-image)
 
     1. 下载 openEuler qcow2 格式的虚拟机镜像至本地。
-    1. 使用 `qemu-nbd` 将 qcow2 格式的虚拟机镜像分区加载至系统，将总大小为 40G 的磁盘分区调整为 8G。
+    1. 使用 `qemu-nbd` 将 qcow2 格式的虚拟机镜像分区加载至系统，调整内核参数禁用 CloudInit。
 
 1. 构建基础云镜像 (base-hwcloud)
 
@@ -91,7 +91,7 @@
     ```bash
     ./openeuler.sh \
         --hwcloud-base \
-        --version 24.03-LTS-SP2 \
+        --version 24.03-LTS-SP3 \
         --arch aarch64 \
         --obs-bucket <BUCKET_NAME>
     ```
@@ -116,7 +116,7 @@
 
     ./openeuler.sh \
         --hwcloud \
-        --version 24.03-LTS-SP2 \
+        --version 24.03-LTS-SP3 \
         --arch aarch64 \
         --vpc <VPC_ID> \
         --subnet <SUBNET_ID> \
